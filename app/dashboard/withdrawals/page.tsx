@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { AlertCircle, ArrowLeftRight, CircleCheck, Clock, ListChecks, Plus } from "lucide-react";
 import {
   DashCard,
@@ -40,6 +41,8 @@ export default function WithdrawalsPage() {
   const [open, setOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const formRef = useRef<HTMLDivElement>(null);
+  const searchParams = useSearchParams();
+  const requestedId = searchParams.get("request");
 
   const selected = withdrawals.find((row) => row.id === selectedId) ?? null;
   const summary = summarizeWithdrawals(withdrawals);
@@ -52,6 +55,13 @@ export default function WithdrawalsPage() {
   useEffect(() => {
     if (selectedId && !selected) setSelectedId(null);
   }, [selected, selectedId]);
+
+  useEffect(() => {
+    if (!ready || !requestedId) return;
+    if (withdrawals.some((row) => row.id === requestedId)) {
+      setSelectedId(requestedId);
+    }
+  }, [ready, requestedId, withdrawals]);
 
   return (
     <PensionPage>

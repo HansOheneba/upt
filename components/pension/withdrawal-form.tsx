@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SignaturePad } from "@/components/pension/signature-pad";
-import { memberName } from "@/lib/pension/metrics";
+import { formatAmountTyping, finalizeAmountInput, memberName, parseAmountInput } from "@/lib/pension/metrics";
 import type { PensionMember, WithdrawalDestination } from "@/lib/pension/types";
 import { usePensionStore } from "@/store/pensionStore";
 
@@ -42,7 +42,7 @@ export function WithdrawalForm({ member, onDone }: WithdrawalFormProps) {
 
   function submit(event: React.FormEvent) {
     event.preventDefault();
-    const parsed = Number(amount);
+    const parsed = parseAmountInput(amount);
     if (!name.trim() || !profession.trim() || !location.trim() || !nextOfKin.trim()) {
       setError("Fill in your details and your next of kin.");
       return;
@@ -100,9 +100,10 @@ export function WithdrawalForm({ member, onDone }: WithdrawalFormProps) {
       <Field
         label="Amount (GHS)"
         id="wd-amount"
-        value={amount}
-        onChange={setAmount}
-        type="number"
+        value={formatAmountTyping(amount)}
+        onChange={(value) => setAmount(formatAmountTyping(value))}
+        onBlur={(value) => setAmount(finalizeAmountInput(value))}
+        inputMode="decimal"
       />
       <div className="space-y-2">
         <Label htmlFor="wd-reason">Reason</Label>
@@ -161,12 +162,16 @@ function Field({
   label,
   value,
   onChange,
+  onBlur,
+  inputMode,
   type = "text",
 }: {
   id: string;
   label: string;
   value: string;
   onChange: (value: string) => void;
+  onBlur?: (value: string) => void;
+  inputMode?: "decimal" | "text" | "tel" | "numeric";
   type?: string;
 }) {
   return (
@@ -175,9 +180,10 @@ function Field({
       <Input
         id={id}
         type={type}
+        inputMode={inputMode}
         value={value}
-        min={type === "number" ? 1 : undefined}
         onChange={(event) => onChange(event.target.value)}
+        onBlur={(event) => onBlur?.(event.currentTarget.value)}
       />
     </div>
   );

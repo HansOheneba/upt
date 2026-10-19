@@ -9,6 +9,30 @@ export function formatGhs(amount: number, digits = 2): string {
   }).format(amount);
 }
 
+/** Thousands separators while typing. Keeps a decimal point and up to two pesewas. */
+export function formatAmountTyping(raw: string): string {
+  const cleaned = raw.replace(/,/g, "").replace(/[^\d.]/g, "");
+  const dot = cleaned.indexOf(".");
+  const wholeDigits = (dot === -1 ? cleaned : cleaned.slice(0, dot)).replace(/^0+(?=\d)/, "");
+  const fraction = dot === -1 ? undefined : cleaned.slice(dot + 1).replace(/\D/g, "").slice(0, 2);
+  const grouped = wholeDigits.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  if (fraction === undefined) return grouped;
+  return `${grouped || "0"}.${fraction}`;
+}
+
+/** Pads a typed decimal to two places. Whole amounts stay without a trailing period. */
+export function finalizeAmountInput(raw: string): string {
+  const typing = formatAmountTyping(raw);
+  if (!typing.includes(".")) return typing;
+  const [whole, fraction = ""] = typing.split(".");
+  if (!fraction) return whole;
+  return `${whole}.${fraction.padEnd(2, "0")}`;
+}
+
+export function parseAmountInput(value: string): number {
+  return Number(value.replace(/,/g, "").trim());
+}
+
 export function formatUnits(units: number): string {
   return new Intl.NumberFormat("en-GH", {
     minimumFractionDigits: 2,
@@ -51,6 +75,13 @@ export function potValue(units: number, unitPrice: number): number {
 
 export type PotPoint = { date: string; value: number };
 
+/**
+ * Reconstructs a pot from contribution unit prices. This is not a valuation
+ * history: prices between contributions are unknown, paid withdrawals are
+ * applied only on the final point at the latest price, and the member record
+ * stores no separate valuation series. Do not plot this as pension value
+ * over time.
+ */
 export function potSeries(
   contributions: Contribution[],
   withdrawals: Withdrawal[],

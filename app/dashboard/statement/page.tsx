@@ -132,6 +132,7 @@ export default function StatementPage() {
           <Row label="Mobile" value={member.mobile} />
           <Row label="Profession" value={member.profession} />
           <Row label="Location" value={member.location} />
+          <Row label="Date of birth" value={formatPensionDate(member.dateOfBirth)} />
           <Row label="Next of kin" value={`${member.nextOfKin} · ${member.nextOfKinContact}`} />
           <Row label="Scheme" value={member.scheme} />
           <Row label="Member since" value={formatPensionDate(member.memberSince)} />

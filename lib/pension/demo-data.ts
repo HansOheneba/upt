@@ -78,6 +78,7 @@ export const DEMO_MEMBER: PensionMember = {
   mobile: "0244119088",
   profession: "Primary school teacher",
   location: "East Legon, Accra",
+  dateOfBirth: "1988-06-14",
   nextOfKin: "Yaw Boateng",
   nextOfKinContact: "0201883344",
   scheme: "My Own Pension",
@@ -153,9 +154,12 @@ export type JoinInput = {
   mobile: string;
   profession: string;
   location: string;
+  dateOfBirth: string;
   nextOfKin: string;
   nextOfKinContact: string;
   monthlyContribution: number;
+  targetPot: number;
+  retirementAge: number;
 };
 
 export function memberFromJoin(input: JoinInput): PensionMember {
@@ -165,20 +169,21 @@ export function memberFromJoin(input: JoinInput): PensionMember {
   const contributions = buildRecentContributions(input.monthlyContribution, 12);
   const unitPrice = contributions[contributions.length - 1]?.unitPrice ?? UNIT_PRICE;
   return {
-    id: `mop-${input.mobile.slice(-6)}`,
+    id: `mop-${input.mobile.replace(/\D/g, "").slice(-6)}`,
     firstName: first,
     lastName: last,
     email: `${slug || "member"}@example.com`,
     mobile: input.mobile.trim(),
     profession: input.profession.trim(),
     location: input.location.trim(),
+    dateOfBirth: input.dateOfBirth,
     nextOfKin: input.nextOfKin.trim(),
     nextOfKinContact: input.nextOfKinContact.trim(),
     scheme: "My Own Pension",
     channel: "mtn_momo",
     monthlyContribution: input.monthlyContribution,
-    retirementAge: 60,
-    targetPot: input.monthlyContribution * 12 * 25,
+    retirementAge: input.retirementAge,
+    targetPot: input.targetPot,
     unitPrice,
     unitPriceDate: UNIT_PRICE_DATE,
     memberSince: contributions[0]?.date ?? UNIT_PRICE_DATE,

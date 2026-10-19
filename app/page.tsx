@@ -27,7 +27,7 @@ import {
 } from "../lib/dashboard-api";
 import { sanitizeAuthApiMessage } from "../lib/auth-api-errors";
 import { brand } from "../lib/tenant";
-import { PensionDemoEntry } from "@/components/pension/demo-entry";
+import { startPensionJoin } from "@/lib/pension/enter";
 
 const OTP_MESSAGE_TYPE = "OTPAuthMessage:HTML";
 
@@ -45,7 +45,7 @@ export default function Home() {
   const router = useRouter();
 
   const [step, setStep] = React.useState<AuthStep>("email");
-  const [mode, setMode] = React.useState<AuthMode>("signup");
+  const [mode, setMode] = React.useState<AuthMode>("login");
   const [email, setEmail] = React.useState("");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isNavigating, setIsNavigating] = React.useState(false);
@@ -347,6 +347,11 @@ export default function Home() {
     setEmail("");
   }
 
+  function handleCreateAccount() {
+    startPensionJoin();
+    router.push("/onboarding");
+  }
+
   return (
     <>
       {!mobileStarted ? (
@@ -406,10 +411,9 @@ export default function Home() {
 
             {/* RIGHT: auth forms */}
             <div className="relative flex w-full bg-white rounded-lg md:shadow-none shadow-md">
-              <section className="relative w-full flex items-center justify-center md:items-start md:justify-center px-6 py-10 md:px-10 md:pb-10 md:pt-10">
-                <div className="w-full max-w-md md:flex md:flex-col md:justify-between md:h-full">
-                  {/* Logo */}
-                  <div className="mb-10 flex items-center justify-center md:justify-start gap-2 md:mb-12">
+              <section className="relative flex w-full items-center justify-center px-6 py-8 md:px-12 md:py-10">
+                <div className="w-full max-w-md">
+                  <div className="mb-8 flex items-center justify-start">
                     <Image
                       src={brand.logo.dark}
                       alt={`${brand.name} logo`}
@@ -419,12 +423,14 @@ export default function Home() {
                       className={brand.logoClassName?.wordmark ?? "h-14 w-auto object-contain"}
                     />
                   </div>
-                  {/* Step content */}
                   {step === "email" ? (
                     <EmailForm
                       onSubmit={handleEmailSubmit}
                       mode={mode}
                       onModeToggle={handleModeToggle}
+                      onCreateAccount={
+                        brand.id === "upt" ? handleCreateAccount : undefined
+                      }
                       isSubmitting={isSubmitting}
                       errorMessage={errorMessage}
                       infoMessage={infoMessage}
@@ -442,13 +448,10 @@ export default function Home() {
                     />
                   )}
 
-                  {brand.id === "upt" && step === "email" ? <PensionDemoEntry /> : null}
-
-                  {/* Footer */}
-                  <div className="mt-6 text-xs text-muted-foreground">
+                  <div className="mt-8">
                     <Link
                       href="/support"
-                      className="hover:text-foreground underline underline-offset-4"
+                      className="inline-flex min-h-11 items-center text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                     >
                       Need help?
                     </Link>

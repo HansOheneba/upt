@@ -32,6 +32,7 @@ function summaryRows(input: StatementExportInput): string[][] {
     ["Mobile", member.mobile],
     ["Profession", member.profession],
     ["Location", member.location],
+    ["Date of birth", formatPensionDate(member.dateOfBirth)],
     ["Next of kin", `${member.nextOfKin} · ${member.nextOfKinContact}`],
     ["Scheme", member.scheme],
     ["Member since", formatPensionDate(member.memberSince)],

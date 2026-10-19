@@ -14,6 +14,7 @@ export type PensionMember = {
   mobile: string;
   profession: string;
   location: string;
+  dateOfBirth: string;
   nextOfKin: string;
   nextOfKinContact: string;
   scheme: "My Own Pension";

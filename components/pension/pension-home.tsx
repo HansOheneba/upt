@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo } from "react";
-import { ArrowLeftRight, Banknote, FileText, Layers, Tag, Wallet } from "lucide-react";
+import { AlertCircle, ArrowLeftRight, Banknote, FileText, Layers, Tag, Wallet } from "lucide-react";
 import {
   DashCard,
   CardContent,
@@ -11,139 +11,85 @@ import {
   CardTitle,
 } from "@/components/dashboard/dash-card";
 import { DashboardEmptyState } from "@/components/dashboard/empty-state";
-import { MetricCards } from "@/components/pension/metric-cards";
+import { KpiStrip } from "@/components/dashboard/kpi-strip";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ContributionHistoryChart } from "@/components/pension/contribution-history-chart";
+import { PensionTarget } from "@/components/pension/pension-target";
 import { PensionPage, PensionPageHeader } from "@/components/pension/page-frame";
 import { usePensionReady } from "@/components/pension/use-pension-ready";
 import { WithdrawalStatusBadge } from "@/components/pension/withdrawal-status";
+import {
+  contributionsInYear,
+  sortContributionsDesc,
+  summarizeContributions,
+} from "@/lib/pension/contributions";
 import {
   formatGhs,
   formatPensionDate,
   formatUnits,
   memberName,
   outstandingUnits,
-  potSeries,
   potValue,
 } from "@/lib/pension/metrics";
-import type { Contribution } from "@/lib/pension/types";
-import type { PotPoint } from "@/lib/pension/metrics";
+import type { Withdrawal } from "@/lib/pension/types";
+import { withdrawalExplanation, withdrawalSubmittedLabel } from "@/lib/pension/withdrawals";
 import { usePensionStore } from "@/store/pensionStore";
 
-const NAVY = "var(--brand-primary)";
-
-function ContributionChart({
-  contributions,
-  pot,
-}: {
-  contributions: Contribution[];
-  pot: PotPoint[];
-}) {
-  if (contributions.length < 2 || pot.length < 2) return null;
-
-  const windowed =
-    contributions.length > 24 ? contributions.slice(-24) : contributions;
-  const potWindow = pot.length > windowed.length ? pot.slice(-windowed.length) : pot;
-
-  const width = 640;
-  const height = 220;
-  const pad = { l: 4, r: 4, t: 12, b: 4 };
-  const innerW = width - pad.l - pad.r;
-  const innerH = height - pad.t - pad.b;
-  const maxAmount = Math.max(...windowed.map((row) => row.amount), 1);
-  const maxPot = Math.max(...potWindow.map((point) => point.value), 1);
-  const slot = innerW / windowed.length;
-  const barW = Math.max(3, slot * 0.55);
-
-  const line = potWindow
-    .map((point, index) => {
-      const x = pad.l + slot * index + slot / 2;
-      const y = pad.t + innerH - (point.value / maxPot) * innerH;
-      return `${index === 0 ? "M" : "L"}${x},${y}`;
-    })
-    .join(" ");
-
-  const first = windowed[0];
-  const last = windowed[windowed.length - 1];
-
-  return (
-    <figure>
-      <svg
-        viewBox={`0 0 ${width} ${height}`}
-        className="h-52 w-full"
-        role="img"
-        aria-label={`Monthly contributions and pot value from ${formatPensionDate(first.date)} to ${formatPensionDate(last.date)}`}
-      >
-        {windowed.map((row, index) => {
-          const barH = (row.amount / maxAmount) * innerH;
-          const x = pad.l + slot * index + (slot - barW) / 2;
-          const y = pad.t + innerH - barH;
-          return (
-            <rect
-              key={row.id}
-              x={x}
-              y={y}
-              width={barW}
-              height={barH}
-              rx={1.5}
-              fill={NAVY}
-            />
-          );
-        })}
-        <path
-          d={line}
-          fill="none"
-          stroke="#8D95A3"
-          strokeWidth="2.5"
-          strokeLinejoin="round"
-          strokeLinecap="round"
-        />
-      </svg>
-      <figcaption className="mt-2 flex items-center justify-between gap-3 text-xs text-muted-foreground">
-        <span className="flex items-center gap-3">
-          <span className="inline-flex items-center gap-1.5">
-            <span className="inline-block h-2 w-2 rounded-sm bg-[var(--brand-primary)]" />
-            Contributions
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <span className="inline-block h-0.5 w-3 bg-[#8D95A3]" />
-            Pot
-          </span>
-        </span>
-        <span>
-          {formatPensionDate(first.date)} – {formatPensionDate(last.date)}
-        </span>
-      </figcaption>
-    </figure>
-  );
-}
-
+/**
+ * Historical pension valuations are not stored, so this page charts recorded
+ * contributions only. The target is the amount and retirement age the member
+ * set. Progress compares the current unit value with that amount. It is not
+ * a projection.
+ */
 export function PensionHome() {
   const ready = usePensionReady();
   const member = usePensionStore((state) => state.member);
   const contributions = usePensionStore((state) => state.contributions);
   const withdrawals = usePensionStore((state) => state.withdrawals);
+  const loadError = usePensionStore((state) => state.loadError);
+  const reload = usePensionStore((state) => state.reload);
 
   const summary = useMemo(() => {
     if (!member) return null;
-    const units = outstandingUnits(contributions, withdrawals, member.unitPrice);
-    const pot = potValue(units, member.unitPrice);
-    const contributed = contributions.reduce((sum, row) => sum + row.amount, 0);
-    const progress =
-      member.targetPot > 0 ? Math.min(100, (pot / member.targetPot) * 100) : 0;
+    const priceReady = Number.isFinite(member.unitPrice) && member.unitPrice > 0;
+    const units = priceReady
+      ? outstandingUnits(contributions, withdrawals, member.unitPrice)
+      : null;
+    const pot = units != null ? potValue(units, member.unitPrice) : null;
+    const activity = summarizeContributions(contributions);
+    const year = new Date().getFullYear();
     return {
       units,
       pot,
-      contributed,
-      progress,
-      series: potSeries(contributions, withdrawals, member.unitPrice),
+      priceReady,
+      activity,
+      contributedThisYear: contributionsInYear(contributions, year),
+      year,
     };
   }, [member, contributions, withdrawals]);
 
   if (!ready) {
     return (
       <PensionPage>
-        <div className="h-64" />
+        <OverviewLoading />
+      </PensionPage>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <PensionPage>
+        <PensionPageHeader
+          title="Overview"
+          description="Your pension value, contributions, and withdrawal requests."
+        />
+        <DashboardEmptyState
+          icon={<AlertCircle />}
+          title="We could not load your pension"
+          description="Try loading your account again."
+          action={{ label: "Try again", onClick: reload }}
+        />
       </PensionPage>
     );
   }
@@ -168,8 +114,10 @@ export function PensionHome() {
     );
   }
 
-  const recent = [...contributions].reverse().slice(0, 5);
-  const openWithdrawal = withdrawals.find((row) => row.status !== "paid");
+  const recent = sortContributionsDesc(contributions).slice(0, 5);
+  const openWithdrawal = activeWithdrawal(withdrawals);
+  const monthlyReady = Number.isFinite(member.monthlyContribution);
+  const latest = summary.activity.latest;
 
   return (
     <PensionPage>
@@ -183,68 +131,111 @@ export function PensionHome() {
         }
       />
 
-      <MetricCards
-        label="Pension summary"
-        items={[
-          {
-            label: "Pot value",
-            value: formatGhs(summary.pot, 0),
-            detail: "Value of units held",
-            icon: Wallet,
-            tone: "blue",
-          },
-          {
-            label: "Units",
-            value: formatUnits(summary.units),
-            detail: "Units still held",
-            icon: Layers,
-            tone: "green",
-          },
-          {
-            label: "Unit price",
-            value: formatGhs(member.unitPrice, 4),
-            detail: `Set by finance on ${formatPensionDate(member.unitPriceDate)}`,
-            icon: Tag,
-            tone: "violet",
-          },
-          {
-            label: "Monthly contribution",
-            value: formatGhs(member.monthlyContribution, 0),
-            detail: "MTN Mobile Money",
-            icon: Banknote,
-            tone: "gold",
-          },
-        ]}
-      />
+      <section aria-label="Pension summary" className="flex flex-col gap-3">
+        <article className="rounded-xl bg-card p-5 ring-1 ring-foreground/10 sm:p-6">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <h2 className="text-sm font-medium text-muted-foreground">Current pension value</h2>
+              {summary.pot != null ? (
+                <p className="mt-2 text-4xl font-semibold tabular-nums tracking-tight">
+                  {formatGhs(summary.pot, 2)}
+                </p>
+              ) : (
+                <p className="mt-2 text-2xl font-semibold tracking-tight">Unavailable</p>
+              )}
+              <p className="mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">
+                {summary.pot != null && summary.units != null
+                  ? "Value of the units you hold at the latest unit price."
+                  : "Your pension value appears here when a unit price is available for the units you hold."}
+              </p>
+            </div>
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--brand-primary)_8%,white)] text-[var(--brand-primary)]">
+              <Wallet aria-hidden className="size-4" />
+            </span>
+          </div>
+        </article>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <DashCard className="lg:col-span-2">
+        <KpiStrip
+          cols={3}
+          items={[
+            {
+              label: "Units held",
+              value: summary.units != null ? formatUnits(summary.units) : "Unavailable",
+              subline: "After paid withdrawals",
+              accent: "green",
+              icon: <Layers aria-hidden className="size-4" />,
+            },
+            {
+              label: "Latest unit price",
+              value: summary.priceReady ? formatGhs(member.unitPrice, 4) : "Unavailable",
+              subline: member.unitPriceDate
+                ? `Set by finance on ${formatPensionDate(member.unitPriceDate)}`
+                : "No unit price date on file",
+              accent: "purple",
+              icon: <Tag aria-hidden className="size-4" />,
+            },
+            {
+              label: "Monthly contribution",
+              value: monthlyReady ? formatGhs(member.monthlyContribution, 2) : "Unavailable",
+              subline: "Agreed amount, paid by Mobile Money",
+              accent: "orange",
+              icon: <Banknote aria-hidden className="size-4" />,
+            },
+          ]}
+        />
+      </section>
+
+      <article className="rounded-xl bg-card p-5 ring-1 ring-foreground/10 sm:p-6">
+        <PensionTarget
+          targetPot={member.targetPot}
+          retirementAge={member.retirementAge}
+          currentValue={summary.pot}
+        />
+      </article>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <DashCard className="h-full">
           <CardHeader>
-            <CardTitle>Contributions and pot</CardTitle>
+            <CardTitle>Contributions over time</CardTitle>
             <CardDescription>
-              Each bar is a Mobile Money payment. The line is the value of your units.
+              Monthly totals of money paid in. Amounts are in Ghana cedis.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <ContributionChart contributions={contributions} pot={summary.series} />
+            <ContributionHistoryChart contributions={contributions} />
           </CardContent>
         </DashCard>
 
-        <DashCard>
+        <DashCard className="h-full">
           <CardHeader>
-            <CardTitle>Progress to age {member.retirementAge}</CardTitle>
+            <CardTitle>Contribution activity</CardTitle>
             <CardDescription>
-              {formatGhs(summary.pot, 0)} of a {formatGhs(member.targetPot, 0)} target.
+              Totals from recorded payments. This is money paid in, not the current pension value.
             </CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-1 flex-col gap-4">
-            <p className="text-4xl font-medium tabular-nums tracking-tight">
-              {summary.progress.toFixed(0)}%
-            </p>
-            <Progress value={summary.progress} />
-            <p className="text-sm text-muted-foreground">
-              {formatGhs(summary.contributed, 0)} received from Mobile Money.
-            </p>
+          <CardContent className="flex flex-1 flex-col">
+            <dl className="flex flex-col">
+              <ActivityRow
+                label="Total paid in"
+                value={formatGhs(summary.activity.totalAmount, 2)}
+              />
+              <ActivityRow
+                label="Payments recorded"
+                value={String(summary.activity.count)}
+              />
+              <ActivityRow
+                label={`Paid in ${summary.year}`}
+                value={formatGhs(summary.contributedThisYear, 2)}
+              />
+              <ActivityRow
+                label="Latest payment"
+                value={
+                  latest && Number.isFinite(latest.amount)
+                    ? `${formatGhs(latest.amount, 2)} · ${formatPensionDate(latest.date)}`
+                    : "None recorded"
+                }
+              />
+            </dl>
           </CardContent>
         </DashCard>
       </div>
@@ -255,29 +246,38 @@ export function PensionHome() {
             <CardTitle>Recent contributions</CardTitle>
             <CardDescription>Latest payments into My Own Pension.</CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-1 flex-col gap-3">
+          <CardContent className="flex flex-1 flex-col">
             {recent.length === 0 ? (
               <DashboardEmptyState
                 size="sm"
                 icon={<FileText />}
-                title="Contributions post from Mobile Money"
-                description="Each MTN Mobile Money payment is converted into units and listed here."
+                title="No contributions yet"
+                description="Recorded payments are listed here."
                 action={{
                   label: "View contributions",
                   href: "/dashboard/contributions",
                 }}
               />
             ) : (
-              recent.map((row) => (
-                <div key={row.id} className="flex items-baseline justify-between gap-3 text-sm">
-                  <span className="text-muted-foreground">{formatPensionDate(row.date)}</span>
-                  <span className="tabular-nums font-medium">{formatGhs(row.amount, 0)}</span>
-                </div>
-              ))
+              <ul className="divide-y divide-foreground/5">
+                {recent.map((row) => (
+                  <li
+                    key={row.id}
+                    className="flex items-baseline justify-between gap-3 py-2.5 text-sm"
+                  >
+                    <time dateTime={row.date?.slice(0, 10)} className="text-muted-foreground">
+                      {row.date ? formatPensionDate(row.date) : "Date unavailable"}
+                    </time>
+                    <span className="tabular-nums font-medium">
+                      {Number.isFinite(row.amount) ? formatGhs(row.amount, 2) : "Unavailable"}
+                    </span>
+                  </li>
+                ))}
+              </ul>
             )}
             {recent.length > 0 ? (
-              <Button variant="outline" asChild className="mt-auto">
-                <Link href="/dashboard/contributions">All contributions</Link>
+              <Button variant="outline" asChild className="mt-4">
+                <Link href="/dashboard/contributions">View contributions</Link>
               </Button>
             ) : null}
           </CardContent>
@@ -286,41 +286,108 @@ export function PensionHome() {
         <DashCard className="h-full">
           <CardHeader>
             <CardTitle>Withdrawal</CardTitle>
-            <CardDescription>Status updates also go out by SMS and email.</CardDescription>
+            <CardDescription>
+              {openWithdrawal ? "Your request in progress." : "Requests you have open."}
+            </CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-1 flex-col gap-3">
+          <CardContent className="flex flex-1 flex-col">
             {openWithdrawal ? (
-              <>
-                <div className="flex items-center justify-between gap-3">
-                  <p className="font-medium">{openWithdrawal.reason}</p>
-                  <WithdrawalStatusBadge status={openWithdrawal.status} />
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  {formatGhs(openWithdrawal.amount, 0)} · submitted{" "}
-                  {formatPensionDate(openWithdrawal.submittedAt)}
-                </p>
-              </>
+              <WithdrawalSummaryCard withdrawal={openWithdrawal} />
             ) : (
               <DashboardEmptyState
                 size="sm"
                 className="border-0 bg-transparent px-0 py-2"
                 icon={<ArrowLeftRight />}
-                title="Request a payout when you need one"
-                description="Request a withdrawal and follow it from received to paid."
+                title={
+                  withdrawals.length > 0
+                    ? "No withdrawal in progress"
+                    : "No withdrawal requests yet"
+                }
+                description={
+                  withdrawals.length > 0
+                    ? "Your earlier requests are complete. Start another when you need a payout."
+                    : "When you need a payout, start a request and follow it here."
+                }
                 action={{
                   label: "Request a withdrawal",
                   href: "/dashboard/withdrawals",
                 }}
               />
             )}
-            {openWithdrawal ? (
-              <Button variant="outline" asChild className="mt-auto">
-                <Link href="/dashboard/withdrawals">View withdrawals</Link>
-              </Button>
-            ) : null}
           </CardContent>
         </DashCard>
       </div>
     </PensionPage>
+  );
+}
+
+function ActivityRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-baseline justify-between gap-4 border-b border-foreground/5 py-3 last:border-0">
+      <dt className="text-sm text-muted-foreground">{label}</dt>
+      <dd className="text-right text-sm font-medium tabular-nums">{value}</dd>
+    </div>
+  );
+}
+
+function WithdrawalSummaryCard({ withdrawal }: { withdrawal: Withdrawal }) {
+  const submitted = withdrawalSubmittedLabel(withdrawal.submittedAt);
+  const amount = Number.isFinite(withdrawal.amount)
+    ? formatGhs(withdrawal.amount, 2)
+    : "Amount unavailable";
+  const reason = withdrawal.reason?.trim() || "Withdrawal";
+
+  return (
+    <div className="flex flex-1 flex-col gap-4">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h3 className="text-base font-medium tracking-tight">{reason}</h3>
+          <p className="mt-1 text-xl font-medium tabular-nums tracking-tight">
+            {amount} requested
+          </p>
+          {submitted ? (
+            <p className="mt-1 text-xs text-muted-foreground">
+              Submitted <time dateTime={withdrawal.submittedAt}>{submitted}</time>
+            </p>
+          ) : (
+            <p className="mt-1 text-xs text-muted-foreground">Submission date unavailable</p>
+          )}
+        </div>
+        <WithdrawalStatusBadge status={withdrawal.status} />
+      </div>
+      <p className="text-sm leading-relaxed text-muted-foreground">
+        {withdrawalExplanation(withdrawal.status)}
+      </p>
+      <Button variant="outline" asChild className="mt-auto self-start">
+        <Link href={`/dashboard/withdrawals?request=${encodeURIComponent(withdrawal.id)}`}>
+          View request
+        </Link>
+      </Button>
+    </div>
+  );
+}
+
+function activeWithdrawal(rows: Withdrawal[]): Withdrawal | null {
+  const open = rows.filter((row) => row.status !== "paid");
+  open.sort((a, b) => (b.submittedAt || "").localeCompare(a.submittedAt || ""));
+  return open[0] ?? null;
+}
+
+function OverviewLoading() {
+  return (
+    <div className="space-y-4" aria-busy="true" aria-live="polite">
+      <span className="sr-only">Loading your pension</span>
+      <Skeleton className="h-16 w-full rounded-xl" />
+      <Skeleton className="h-32 w-full rounded-xl" />
+      <div className="grid grid-cols-1 gap-3 @xl/dash:grid-cols-3">
+        {Array.from({ length: 3 }, (_, index) => (
+          <Skeleton key={index} className="h-28 rounded-xl" />
+        ))}
+      </div>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Skeleton className="h-80 rounded-xl" />
+        <Skeleton className="h-80 rounded-xl" />
+      </div>
+    </div>
   );
 }

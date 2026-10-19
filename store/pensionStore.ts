@@ -87,6 +87,7 @@ type PensionStore = PensionSnapshot & {
   clear: () => void;
   addWithdrawal: (input: NewWithdrawal) => void;
   addRequest: (input: { subject: string; body: string }) => void;
+  updateTargets: (input: { targetPot: number; retirementAge: number }) => void;
 };
 
 function commit(
@@ -151,6 +152,17 @@ export const usePensionStore = create<PensionStore>((set, get) => ({
       requests: get().requests,
     };
     commit(set, next);
+  },
+
+  updateTargets: ({ targetPot, retirementAge }) => {
+    const member = get().member;
+    if (!member) return;
+    commit(set, {
+      member: { ...member, targetPot, retirementAge },
+      contributions: get().contributions,
+      withdrawals: get().withdrawals,
+      requests: get().requests,
+    });
   },
 
   addRequest: ({ subject, body }) => {

@@ -227,7 +227,7 @@ export default function DashboardSidebar() {
       className="border-r border-white/10 text-white/80"
     >
       {/* ── Header: Logo ── */}
-      <SidebarHeader className="sticky top-0 z-10 h-14 flex-row items-center justify-center border-b border-white/10 p-0 px-3">
+      <SidebarHeader className="sticky top-0 z-10 h-16 flex-row items-center justify-center border-b border-white/10 p-0 px-3">
         <Link
           href={homeHref}
           onClick={closeMobile}
