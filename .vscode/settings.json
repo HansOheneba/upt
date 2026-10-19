@@ -1,0 +1,14 @@
+{
+  "chat.tools.terminal.autoApprove": {
+    "npx tsc": true,
+    "mkdir": true,
+    "/^node --version && cat /Users/hansopoku/Desktop/code/celerey-client-dash/package\\.json \\| grep -E '\"next\"\\|\"node\"'$/": {
+      "approve": true,
+      "matchCommandLine": true
+    },
+    "/^node -e \"JSON\\.parse\\(require\\('fs'\\)\\.readFileSync\\('backend-stripe-spec\\.json','utf8'\\)\\); console\\.log\\('Valid ✓'\\)\"$/": {
+      "approve": true,
+      "matchCommandLine": true
+    }
+  }
+}

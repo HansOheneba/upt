@@ -1,0 +1,42 @@
+---
+description: Terminal usage
+alwaysApply: true
+---
+
+Use the terminal sparingly.
+
+Allowed:
+
+- npm run build
+- npm test (only if requested)
+- lint (only if requested)
+- git status
+
+Avoid:
+
+- repeated builds
+- repeated installs
+- repeated dev server launches
+- unnecessary shell commands
+
+Never rerun commands whose output has already established success.
+
+Only execute commands that directly contribute to solving the task.
+
+When the requested change affects only a few files, avoid searching the entire repository.
+
+Prefer targeted file reads.
+
+Only expand the search if the required implementation cannot be completed from the known context.
+
+After implementation, run:
+
+```bash
+npm run build
+```
+
+If the build succeeds, stop.
+
+Do not continue experimenting.
+
+Do not perform visual verification unless requested.

@@ -1,0 +1,36 @@
+---
+description: Architecture rules
+alwaysApply: true
+---
+
+Write code intended for long-term maintenance.
+
+Priorities:
+
+1. readability
+2. scalability
+3. maintainability
+4. performance
+
+Avoid clever code.
+
+Avoid deeply nested logic.
+
+Prefer small focused functions.
+
+Prefer composition over duplication.
+
+Avoid files becoming excessively large.
+
+Extract reusable code into:
+
+- hooks
+- utilities
+- services
+- components
+
+Do not over-engineer.
+
+Only abstract when duplication is beginning to emerge.
+
+Every implementation should be easy for another engineer to understand six months later.

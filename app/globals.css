@@ -1,26 +1,550 @@
 @import "tailwindcss";
+@import "tailwindcss-animated";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --font-sans: var(--font-app);
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-accent: var(--brand-accent);
+  --color-brand-background: var(--brand-background);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-brand-muted: var(--brand-muted, var(--brand-accent));
+  --color-brand-surface: var(--brand-surface, var(--brand-background));
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-success: #059669;
+  --color-warning: #b45309;
+  --color-accent-blue: #2563eb;
+  --color-surface-success: #ecfdf5;
+  --color-surface-warning: #fffbeb;
+  --color-surface-info: #eff6ff;
+  --color-surface-muted: var(--muted);
+  --color-surface-brand: #f4f3ff;
+  --color-workspace: var(--background);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  /*
+   * Brand tokens: the values below are the Celerey defaults and act as a
+   * static fallback (e.g. before hydration). The actual active-tenant
+   * values are set at runtime via an inline style on <html> in
+   * app/layout.tsx, sourced from lib/tenant.ts. See
+   * docs/architecture/WHITE_LABELING.md.
+   */
+  --brand-primary: #151339;
+  --brand-accent: #8c80f8;
+  --brand-background: oklch(1 0 0);
+  --brand-foreground: oklch(0.145 0 0);
+
+  --radius: 0.625rem;
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: #18163f;
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: #18163f;
+  --sidebar-foreground: rgba(255, 255, 255, 0.8);
+  --sidebar-primary: #ffffff;
+  --sidebar-primary-foreground: #18163f;
+  --sidebar-accent: rgba(255, 255, 255, 0.1);
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --sidebar-ring: rgba(255, 255, 255, 0.3);
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    @apply bg-background text-foreground;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@keyframes celerey-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.14);
+    opacity: 0.8;
+  }
 }
+
+.animate-celerey-breathe {
+  animation: celerey-breathe 1.8s ease-in-out infinite;
+}
+
+.dashboard-surface {
+  background-color: var(--brand-surface, rgb(247, 247, 247));
+}
+
+.phone-input-field {
+  display: flex !important;
+  align-items: center !important;
+  height: 2.5rem !important;
+  width: 100% !important;
+  border-radius: 0.375rem !important;
+  border: 1px solid hsl(var(--border)) !important;
+  background-color: hsl(var(--background)) !important;
+  padding: 0 0.75rem !important;
+}
+
+.phone-input-field .PhoneInputInput {
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  font-size: 0.875rem !important;
+  color: hsl(var(--foreground)) !important;
+  flex: 1 !important;
+}
+
+.phone-input-field:focus-within {
+  box-shadow: 0 0 0 2px hsl(var(--ring)) !important;
+}
+
+/* ── Dashboard tour (driver.js) — advisory brand ── */
+.celerey-driver-popover.driver-popover {
+  background: #ffffff;
+  border: 1px solid color-mix(in srgb, var(--brand-accent) 35%, transparent);
+  border-radius: 14px;
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.22),
+    0 0 0 1px color-mix(in srgb, var(--brand-primary) 4%, transparent);
+  max-width: min(22rem, calc(100vw - 2rem));
+  color: var(--brand-primary);
+}
+
+.celerey-driver-popover .driver-popover-footer,
+.celerey-driver-popover .celerey-tour-footer {
+  display: flex !important;
+  margin-top: 1rem;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.celerey-driver-popover .driver-popover-next-btn,
+.celerey-driver-popover .driver-popover-prev-btn,
+.celerey-driver-popover .driver-popover-navigation-btns {
+  display: none !important;
+}
+
+.celerey-driver-popover .celerey-tour-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  flex-wrap: nowrap;
+  margin-left: auto;
+}
+
+/* driver.js resets footer buttons — restore shadcn Button styling */
+.celerey-driver-popover .celerey-tour-actions [data-slot="button"] {
+  all: revert-layer;
+  pointer-events: auto;
+}
+
+.celerey-driver-popover .driver-popover-close-btn {
+  display: block !important;
+}
+
+.celerey-driver-popover .driver-popover-title {
+  font-size: 1rem;
+  font-weight: 650;
+  color: var(--brand-primary);
+  letter-spacing: -0.01em;
+}
+
+.celerey-driver-popover .driver-popover-description {
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--brand-accent);
+}
+
+.celerey-driver-popover .celerey-tour-desc {
+  margin: 0 0 0.65rem;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--brand-foreground);
+}
+
+.celerey-driver-popover .celerey-tour-desc strong {
+  font-weight: 600;
+  color: var(--brand-primary);
+}
+
+.celerey-driver-popover .celerey-tour-hint {
+  margin: 0 0 0.5rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--brand-accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--brand-accent) 22%, transparent);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--brand-foreground);
+}
+
+.celerey-driver-popover .celerey-tour-tip {
+  margin: 0;
+  font-size: 0.6875rem;
+  color: var(--brand-accent);
+}
+
+.celerey-driver-popover .celerey-tour-progress {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--brand-accent);
+  flex-shrink: 0;
+  letter-spacing: 0.04em;
+}
+
+.celerey-driver-popover .driver-popover-close-btn {
+  color: var(--brand-accent);
+}
+
+.celerey-driver-popover .driver-popover-arrow {
+  border-color: color-mix(in srgb, var(--brand-accent) 35%, transparent);
+}
+
+.celerey-tour-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0 0.15rem;
+}
+
+.celerey-tour-spinner {
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-bottom: 0.45rem;
+  border-radius: 9999px;
+  border: 2px solid color-mix(in srgb, var(--brand-accent) 22%, transparent);
+  border-top-color: var(--brand-accent);
+  animation: celerey-tour-spin 0.7s linear infinite;
+}
+
+.celerey-tour-loading-label {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--brand-accent);
+}
+
+.celerey-tour-loading-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: var(--brand-primary);
+}
+
+.celerey-tour-skeleton {
+  width: 100%;
+  margin-top: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.celerey-tour-skeleton-line {
+  height: 0.55rem;
+  border-radius: 9999px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--brand-accent) 12%, transparent) 0%,
+    color-mix(in srgb, var(--brand-accent) 28%, transparent) 50%,
+    color-mix(in srgb, var(--brand-accent) 12%, transparent) 100%
+  );
+  background-size: 200% 100%;
+  animation: celerey-tour-shimmer 1.1s ease-in-out infinite;
+}
+
+.celerey-tour-skeleton-line--short {
+  width: 62%;
+  align-self: center;
+}
+
+.celerey-tour-skeleton-line--medium {
+  width: 78%;
+  align-self: center;
+}
+
+.celerey-tour-bridge-card {
+  animation: celerey-tour-bridge-in 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes celerey-tour-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes celerey-tour-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+@keyframes celerey-tour-bridge-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Celerey AI keeps Celerey product colors even on Fidelity deployments. */
+[data-celerey-ai] {
+  --brand-primary: #151339;
+  --brand-accent: #8c80f8;
+  --primary: #18163f;
+  --primary-foreground: oklch(0.985 0 0);
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --border: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+}
+
+/*
+ * Fidelity: only orange, brown, cream, white, and black in the UI.
+ * Hard-coded Tailwind palette classes are remapped; Celerey AI is excluded.
+ */
+html[data-tenant="fidelity"]
+  :where(:not([data-celerey-ai], [data-celerey-ai] *))
+  :is(
+    [class*="text-emerald"],
+    [class*="text-green"],
+    [class*="text-lime"],
+    [class*="text-teal"],
+    [class*="text-cyan"],
+    [class*="text-sky"],
+    [class*="text-blue"],
+    [class*="text-indigo"],
+    [class*="text-violet"],
+    [class*="text-purple"],
+    [class*="text-fuchsia"],
+    [class*="text-pink"],
+    [class*="text-rose"],
+    [class*="text-red"],
+    [class*="text-amber"],
+    [class*="text-yellow"]
+  ) {
+  color: var(--brand-primary) !important;
+}
+
+html[data-tenant="fidelity"]
+  :where(:not([data-celerey-ai], [data-celerey-ai] *))
+  [class*="text-slate"],
+html[data-tenant="fidelity"]
+  :where(:not([data-celerey-ai], [data-celerey-ai] *))
+  [class*="text-gray"],
+html[data-tenant="fidelity"]
+  :where(:not([data-celerey-ai], [data-celerey-ai] *))
+  [class*="text-zinc"],
+html[data-tenant="fidelity"]
+  :where(:not([data-celerey-ai], [data-celerey-ai] *))
+  [class*="text-neutral"],
+html[data-tenant="fidelity"]
+  :where(:not([data-celerey-ai], [data-celerey-ai] *))
+  [class*="text-stone"] {
+  color: var(--brand-accent) !important;
+}
+
+html[data-tenant="fidelity"]
+  :where(:not([data-celerey-ai], [data-celerey-ai] *))
+  :is(
+    [class*="bg-emerald"],
+    [class*="bg-green"],
+    [class*="bg-lime"],
+    [class*="bg-teal"],
+    [class*="bg-cyan"],
+    [class*="bg-sky"],
+    [class*="bg-blue"],
+    [class*="bg-indigo"],
+    [class*="bg-violet"],
+    [class*="bg-purple"],
+    [class*="bg-fuchsia"],
+    [class*="bg-pink"],
+    [class*="bg-rose"],
+    [class*="bg-red"],
+    [class*="bg-amber"],
+    [class*="bg-yellow"]
+  ) {
+  background-color: color-mix(
+    in srgb,
+    var(--brand-primary) 14%,
+    #ffffff
+  ) !important;
+}
+
+html[data-tenant="fidelity"]
+  :where(:not([data-celerey-ai], [data-celerey-ai] *))
+  :is(
+    [class*="bg-slate"],
+    [class*="bg-gray"],
+    [class*="bg-zinc"],
+    [class*="bg-neutral"],
+    [class*="bg-stone"]
+  ) {
+  background-color: color-mix(
+    in srgb,
+    var(--brand-accent) 10%,
+    var(--brand-surface)
+  ) !important;
+}
+
+html[data-tenant="fidelity"]
+  :where(:not([data-celerey-ai], [data-celerey-ai] *))
+  :is(
+    [class*="border-emerald"],
+    [class*="border-green"],
+    [class*="border-lime"],
+    [class*="border-teal"],
+    [class*="border-cyan"],
+    [class*="border-sky"],
+    [class*="border-blue"],
+    [class*="border-indigo"],
+    [class*="border-violet"],
+    [class*="border-purple"],
+    [class*="border-fuchsia"],
+    [class*="border-pink"],
+    [class*="border-rose"],
+    [class*="border-red"],
+    [class*="border-amber"],
+    [class*="border-yellow"]
+  ) {
+  border-color: color-mix(
+    in srgb,
+    var(--brand-primary) 35%,
+    #ffffff
+  ) !important;
+}
+
+html[data-tenant="fidelity"]
+  :where(:not([data-celerey-ai], [data-celerey-ai] *))
+  :is(
+    [class*="border-slate"],
+    [class*="border-gray"],
+    [class*="border-zinc"],
+    [class*="border-neutral"],
+    [class*="border-stone"]
+  ) {
+  border-color: color-mix(
+    in srgb,
+    var(--brand-accent) 28%,
+    #ffffff
+  ) !important;
+}
+
+html[data-tenant="fidelity"]
+  :where(:not([data-celerey-ai], [data-celerey-ai] *))
+  :is(
+    [class*="bg-emerald-500"],
+    [class*="bg-green-500"],
+    [class*="bg-sky-500"],
+    [class*="bg-blue-500"],
+    [class*="bg-rose-500"],
+    [class*="bg-red-500"],
+    [class*="bg-amber-500"]
+  ) {
+  background-color: var(--brand-primary) !important;
+}
+
+@media print {
+  [data-slot="sidebar"],
+  [data-sidebar="sidebar"] {
+    display: none !important;
+  }
+
+  [data-slot="sidebar-inset"],
+  [data-slot="sidebar-inset"] main {
+    height: auto !important;
+    overflow: visible !important;
+    background: white !important;
+  }
+
+  #pension-statement {
+    box-shadow: none;
+  }
+}
+

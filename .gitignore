@@ -16,6 +16,7 @@
 # next.js
 /.next/
 /out/
+/tmp
 
 # production
 /build
@@ -32,10 +33,19 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
 
+# statement uploads
+/data
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+claude.md
+/.claude
+/.agents
+/docs

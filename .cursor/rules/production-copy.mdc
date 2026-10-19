@@ -1,0 +1,16 @@
+---
+description: User-facing copy is production language. Empty states include a graphic and a primary action.
+alwaysApply: true
+---
+
+# Production copy
+
+This product is being demoed as a finished member experience. Write every user-facing string as if the feature is live.
+
+Never tell the user that something is a demo, a placeholder, sample data, mock data, or that it stays on this device. Do not mention roadmaps, "for now", or "coming soon" in the interface. Internal code comments and variable names can stay technical.
+
+Empty states are part of the product, not a missing screen:
+
+- Show an icon or graphic.
+- Say what the section is for in one or two sentences.
+- Include one button that runs the primary action of that tab (add, request, record, open, export). A sentence alone is not an empty state.

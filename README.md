@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# United Pension Trustees Client Dashboard
 
-## Getting Started
+Client portal for United Pension Trustees: onboarding, pension and financial goals, cash flow, assets, insurance, properties, liabilities, retirement planning, and an AI assistant.
 
-First, run the development server:
+This repository is a copy of the Celerey client frontend so United Pension Trustees can diverge on product features. Branding still comes from `NEXT_PUBLIC_TENANT` (default `upt`). See [Multi-brand / white-label deployments](#multi-brand--white-label-deployments) below.
+
+## Stack
+
+- [Next.js](https://nextjs.org) 16 (App Router) + React 19 + TypeScript (strict)
+- [Zustand](https://github.com/pmndrs/zustand) for client-side state
+- [Tailwind CSS](https://tailwindcss.com) v4 + [shadcn/ui](https://ui.shadcn.com)
+- react-hook-form + Zod for forms/validation
+
+See [docs/architecture/ARCHITECTURE.md](docs/architecture/ARCHITECTURE.md) for a full architecture overview, [docs/architecture/CODING_STANDARDS.md](docs/architecture/CODING_STANDARDS.md) for conventions, and [docs/architecture/API_LAYER.md](docs/architecture/API_LAYER.md) for how the backend proxy works.
+
+## Getting started
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Copy [`.env.example`](.env.example) to `.env.local` and fill in real values (see a team member or the deployment platform):
 
-## Learn More
+```
+NEXT_PUBLIC_TENANT
+NEXT_PUBLIC_BASE_API_URL
+NEXT_PUBLIC_APP_URL
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+NEXT_PUBLIC_CORE_SUBSCRIPTION_URL_7DAYS_TRIAL
+NEXT_PUBLIC_CORE_SUBSCRIPTION_URL_PREMIUM
+NEXT_PUBLIC_CORE_SUBSCRIPTION_PRICE_ID
+NEXT_PUBLIC_DEMO_USER
+NEXT_PUBLIC_GOOGLE_API_KEY
+DEEPSEEK_API_KEY
+DEMO_AI_ENABLED
+```
 
-To learn more about Next.js, take a look at the following resources:
+Never commit real values for these; `.env*` is gitignored.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Scripts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Command | Purpose |
+|---|---|
+| `npm run dev` | Start the dev server (uses `NEXT_PUBLIC_TENANT` from `.env.local`, defaults to `upt`) |
+| `npm run dev:upt` | Start the dev server as United Pension Trustees |
+| `npm run dev:celerey` | Start the dev server as the `celerey` brand |
+| `npm run dev:ecobank` | Start the dev server as the `ecobank` brand |
+| `npm run dev:stanbic` | Start the dev server as the `stanbic` brand (Stanbic Investment Management Services) |
+| `npm run dev:absa` | Start the dev server as the `absa` brand (Absa Bank Ghana) |
+| `npm run dev:gcb` | Start the dev server as the `gcb` brand (GCB Bank PLC) |
+| `npm run dev:fidelity` | Start the dev server as the `fidelity` brand (Fidelity Bank Ghana) |
+| `npm run dev:access` | Start the dev server as the `access` brand (Access Bank Ghana) |
+| `npm run dev:omnibsic` | Start the dev server as the `omnibsic` brand (OmniBSIC Bank) |
+| `npm run dev:fnb` | Start the dev server as the `fnb` brand (FNB Ghana / FirstRand) |
+| `npm run dev:petra` | Start the dev server as the `petra` brand (Petra) |
+| `npm run build` | Production build (also type-checks) |
+| `npm run start` | Run a production build locally |
+| `npm run lint` | Run ESLint |
 
-## Deploy on Vercel
+## Multi-brand / white-label deployments
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+This app supports deploying the same codebase as multiple branded products (different logo, colors, and product name) via a single `NEXT_PUBLIC_TENANT` env var per deployment. See [docs/architecture/WHITE_LABELING.md](docs/architecture/WHITE_LABELING.md) for how tenant resolution works, how to add a new brand, and which env vars are public vs. private.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Documentation
+
+- [Architecture overview](docs/architecture/ARCHITECTURE.md)
+- [Coding standards](docs/architecture/CODING_STANDARDS.md)
+- [API layer / backend proxy](docs/architecture/API_LAYER.md)
+- [White-labeling / multi-brand deployments](docs/architecture/WHITE_LABELING.md)
+- [Design system](docs/CELEREY_DESIGN_SYSTEM.md)
+
+Documentation must be kept up to date alongside code changes; see [rules/documentation.mdc](rules/documentation.mdc).

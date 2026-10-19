@@ -1,0 +1,18 @@
+---
+description: Performance rules
+alwaysApply: true
+---
+
+Avoid unnecessary renders.
+
+Avoid duplicate queries.
+
+Avoid duplicate network requests.
+
+Avoid duplicate computation.
+
+Prefer lazy loading where appropriate.
+
+Do not optimize prematurely.
+
+Choose maintainability over micro-optimizations.

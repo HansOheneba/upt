@@ -1,0 +1,28 @@
+---
+description: UI component conventions — shadcn/ui usage
+alwaysApply: true
+---
+
+# UI Components
+
+Use shadcn/ui for anything shadcn already provides. Do not build custom
+buttons, cards, inputs, dialogs, tables, etc. when a shadcn primitive covers
+the need — install/use the shadcn component and wire up the implementation
+around it instead.
+
+Keep shadcn's default padding, spacing, and sizing. Do not override a
+component's built-in structural classes (height, padding, gap, radius) unless
+there's a concrete reason tied to this project's design system.
+
+Colors are the one dimension expected to change — theme tokens (background,
+foreground, primary, status colors, etc.) can be customized freely to match
+this project's palette.
+
+When editing a shadcn component's className, always merge with `cn(...)`
+rather than replacing the base classes — never break the base
+`buttonVariants`/similar variant classes a component ships with.
+
+This is a strong default, not an absolute lock: if there's a good reason to
+deviate (accessibility, a real UX problem, a case shadcn doesn't cover), it's
+fine to suggest it — just flag that it's a deviation from stock shadcn rather
+than silently reskinning components.

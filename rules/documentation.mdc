@@ -1,0 +1,17 @@
+---
+description: Documentation upkeep
+alwaysApply: true
+---
+
+Docs under docs/architecture/ are the source of truth for the current state of the project. Stale docs are treated as a bug, not deferred cleanup.
+
+If a change adds, removes, or changes any of the following, update the matching doc in the same change:
+
+- A route, page, or API endpoint → docs/architecture/ARCHITECTURE.md and/or docs/architecture/API_LAYER.md
+- A Zustand store, or the top-level folder structure → docs/architecture/ARCHITECTURE.md
+- The auth/data-flow between the client, the proxy, and the backend → docs/architecture/API_LAYER.md
+- A project-wide convention (naming, styling, state pattern, TypeScript rules) → docs/architecture/CODING_STANDARDS.md
+
+Do not let docs/architecture/*.md and rules/*.mdc drift apart. If a change updates a convention described in both places, update both.
+
+Do not add new "temporary" or "TODO" documentation files outside docs/architecture/ for anything meant to be a lasting convention.

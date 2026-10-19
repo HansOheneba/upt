@@ -1,0 +1,20 @@
+---
+description: React conventions
+alwaysApply: true
+---
+
+Prefer functional components.
+
+Keep components focused.
+
+Avoid prop drilling when reasonable.
+
+Extract reusable hooks.
+
+Avoid unnecessary state.
+
+Avoid premature optimization.
+
+Use memoization only when there is measurable benefit.
+
+Prefer simple code over clever code.

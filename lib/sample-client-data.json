@@ -1,0 +1,1522 @@
+{
+  "state": {
+    "user": {
+      "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "email": "bill.richardson@email.com",
+      "first_name": "Bill",
+      "last_name": "Richardson",
+      "display_name": "Bill Richardson",
+      "phone_number": "+44 7700 900483",
+      "resident_country": "GB",
+      "resident_state": "England",
+      "city": "London",
+      "date_of_birth": "1988-09-22",
+      "currency": "GHS",
+      "occupation": "Management consultant",
+      "marital_status": "married",
+      "gender": "male",
+      "prefix": "Mr",
+      "dependents": 2,
+      "citizenships": [
+        "GB",
+        "NG"
+      ],
+      "risk_profile": "growth",
+      "account_mode": "solo",
+      "bio": "I consult out of Stratford. Most of the money is in property. Our flat, rentals in Hackney and Manchester, the Lekki house, a place in Accra. GH₵6,400 a month to my parents in Port Harcourt. Investments sit in a Vanguard ISA and an AJ Bell SIPP.",
+      "is_active": true,
+      "user_type": "regular",
+      "created_at": "2024-01-10T09:00:00.000Z",
+      "updated_at": "2026-09-07T10:00:00.000Z",
+      "investment_currency": "USD"
+    },
+    "riskAssessment": {
+      "assessment_id": "ra-9988-aabb-ccdd-eeff00112233",
+      "questionnaire_version": "1.0",
+      "responses": {
+        "q1": 4,
+        "q2": 3,
+        "q3": 4,
+        "q4": 3,
+        "q5": 4,
+        "q6": 3
+      },
+      "profile_snapshot": {
+        "age": 37,
+        "dependents": 2,
+        "debt_level": "moderate",
+        "emergency_fund_status": "funded",
+        "country_code": "GB"
+      },
+      "scoring": {
+        "time_horizon_avg": 3.83,
+        "questionnaire_score": 3.8,
+        "modifiers": {
+          "age": 0.1,
+          "dependents": -0.2,
+          "debt": -0.1,
+          "emergency_fund": 0.2
+        },
+        "modifier_total": 0,
+        "final_score": 3.4
+      },
+      "result": {
+        "risk_band": "Growth",
+        "description": "You're fine with some volatility if returns are better long term.",
+        "strategy": "Mostly equities, around 65-75%. Some bonds and alternatives on the side."
+      },
+      "is_recalculation": false,
+      "created_at": "2026-02-18T11:00:00.000Z"
+    },
+    "incomeRows": [
+      {
+        "id": "inc-001",
+        "name": "Salary - Deloitte UK",
+        "amount": 124800,
+        "isRecurring": true,
+        "recurringType": "monthly",
+        "startDate": "2022-04-01",
+        "endDate": null
+      },
+      {
+        "id": "inc-002",
+        "name": "Freelance advisory",
+        "amount": 19200,
+        "isRecurring": true,
+        "recurringType": "monthly",
+        "startDate": "2024-03-01",
+        "endDate": null
+      },
+      {
+        "id": "inc-003",
+        "name": "Accra flat rent",
+        "amount": 10880,
+        "isRecurring": true,
+        "recurringType": "monthly",
+        "startDate": "2023-06-01",
+        "endDate": null
+      },
+      {
+        "id": "inc-004",
+        "name": "Lagos guest wing rent",
+        "amount": 13600,
+        "isRecurring": true,
+        "recurringType": "monthly",
+        "startDate": "2024-01-01",
+        "endDate": null
+      },
+      {
+        "id": "inc-005",
+        "name": "Q4 performance bonus",
+        "amount": 56000,
+        "isRecurring": false,
+        "recurringType": "one-time",
+        "startDate": "2025-12-01",
+        "endDate": null
+      },
+      {
+        "id": "inc-006",
+        "name": "Fintech consulting project",
+        "amount": 44800,
+        "isRecurring": false,
+        "recurringType": "one-time",
+        "startDate": "2026-05-01",
+        "endDate": null
+      },
+      {
+        "id": "inc-007",
+        "name": "Hackney flat rent",
+        "amount": 31200,
+        "isRecurring": true,
+        "recurringType": "monthly",
+        "startDate": "2023-11-01",
+        "endDate": null
+      },
+      {
+        "id": "inc-008",
+        "name": "Manchester flat rent",
+        "amount": 18880,
+        "isRecurring": true,
+        "recurringType": "monthly",
+        "startDate": "2024-07-01",
+        "endDate": null
+      },
+      {
+        "id": "inc-011",
+        "name": "Atlanta condo rent",
+        "amount": 24320,
+        "isRecurring": true,
+        "recurringType": "monthly",
+        "startDate": "2025-03-01",
+        "endDate": null
+      },
+      {
+        "id": "inc-009",
+        "name": "HMRC tax rebate",
+        "amount": 19200,
+        "isRecurring": false,
+        "recurringType": "one-time",
+        "startDate": "2026-04-01",
+        "endDate": null
+      },
+      {
+        "id": "inc-010",
+        "name": "Mid-year retention bonus",
+        "amount": 35200,
+        "isRecurring": false,
+        "recurringType": "one-time",
+        "startDate": "2026-07-01",
+        "endDate": null
+      }
+    ],
+    "expenseCategories": [
+      {
+        "id": "exp-001",
+        "name": "Stratford flat mortgage",
+        "amount": 31680,
+        "essential": true,
+        "isRecurring": true,
+        "recurringType": "monthly",
+        "startDate": "2021-03-01"
+      },
+      {
+        "id": "exp-002",
+        "name": "Lagos home mortgage (GTBank)",
+        "amount": 5440,
+        "essential": true,
+        "isRecurring": true,
+        "recurringType": "monthly",
+        "startDate": "2019-04-01"
+      },
+      {
+        "id": "exp-003",
+        "name": "Remittance to parents (Port Harcourt)",
+        "amount": 6400,
+        "essential": true,
+        "isRecurring": true,
+        "recurringType": "monthly",
+        "startDate": "2023-01-01"
+      },
+      {
+        "id": "exp-004",
+        "name": "School fees (Chidi & Adaeze)",
+        "amount": 14720,
+        "essential": true,
+        "isRecurring": true,
+        "recurringType": "monthly",
+        "startDate": "2024-09-01"
+      },
+      {
+        "id": "exp-005",
+        "name": "Groceries",
+        "amount": 9920,
+        "essential": true,
+        "isRecurring": true,
+        "recurringType": "monthly",
+        "startDate": "2023-01-01"
+      },
+      {
+        "id": "exp-006",
+        "name": "Car and commute",
+        "amount": 4960,
+        "essential": true,
+        "isRecurring": true,
+        "recurringType": "monthly",
+        "startDate": "2023-01-01"
+      },
+      {
+        "id": "exp-007",
+        "name": "Utilities (gas, electric, water)",
+        "amount": 3920,
+        "essential": true,
+        "isRecurring": true,
+        "recurringType": "monthly",
+        "startDate": "2023-01-01"
+      },
+      {
+        "id": "exp-008",
+        "name": "Car loan - Toyota RAV4",
+        "amount": 6160,
+        "essential": true,
+        "isRecurring": true,
+        "recurringType": "monthly",
+        "startDate": "2024-02-01"
+      },
+      {
+        "id": "exp-009",
+        "name": "Life and health insurance",
+        "amount": 2960,
+        "essential": true,
+        "isRecurring": true,
+        "recurringType": "monthly",
+        "startDate": "2023-01-01"
+      },
+      {
+        "id": "exp-010",
+        "name": "Restaurants and going out",
+        "amount": 5120,
+        "essential": false,
+        "isRecurring": true,
+        "recurringType": "monthly",
+        "startDate": "2023-01-01"
+      },
+      {
+        "id": "exp-011",
+        "name": "Gym",
+        "amount": 1200,
+        "essential": false,
+        "isRecurring": true,
+        "recurringType": "monthly",
+        "startDate": "2023-06-01"
+      },
+      {
+        "id": "exp-012",
+        "name": "Subscriptions",
+        "amount": 768,
+        "essential": false,
+        "isRecurring": true,
+        "recurringType": "monthly",
+        "startDate": "2023-01-01"
+      },
+      {
+        "id": "exp-020",
+        "name": "Car insurance",
+        "amount": 1184,
+        "essential": true,
+        "isRecurring": true,
+        "recurringType": "monthly",
+        "startDate": "2025-08-01"
+      },
+      {
+        "id": "exp-013",
+        "name": "Lagos property exterior repaint",
+        "amount": 14400,
+        "essential": false,
+        "isRecurring": false,
+        "recurringType": "one-time",
+        "startDate": "2025-10-01"
+      },
+      {
+        "id": "exp-014",
+        "name": "Emergency plumber (burst pipe)",
+        "amount": 2880,
+        "essential": true,
+        "isRecurring": false,
+        "recurringType": "one-time",
+        "startDate": "2025-08-01"
+      },
+      {
+        "id": "exp-015",
+        "name": "Christmas hosting",
+        "amount": 12480,
+        "essential": false,
+        "isRecurring": false,
+        "recurringType": "one-time",
+        "startDate": "2025-12-01"
+      },
+      {
+        "id": "exp-016",
+        "name": "Chidi's school residential trip",
+        "amount": 7200,
+        "essential": true,
+        "isRecurring": false,
+        "recurringType": "one-time",
+        "startDate": "2026-02-01"
+      },
+      {
+        "id": "exp-017",
+        "name": "Car MOT & brake pads",
+        "amount": 6720,
+        "essential": true,
+        "isRecurring": false,
+        "recurringType": "one-time",
+        "startDate": "2026-03-01"
+      },
+      {
+        "id": "exp-018",
+        "name": "Cousin's wedding gift (Lagos)",
+        "amount": 8000,
+        "essential": false,
+        "isRecurring": false,
+        "recurringType": "one-time",
+        "startDate": "2026-04-01"
+      },
+      {
+        "id": "exp-019",
+        "name": "Accra tenant turnover repairs",
+        "amount": 6720,
+        "essential": false,
+        "isRecurring": false,
+        "recurringType": "one-time",
+        "startDate": "2026-01-01"
+      },
+      {
+        "id": "exp-021",
+        "name": "Back-to-school kit (Chidi & Adaeze)",
+        "amount": 10240,
+        "essential": true,
+        "isRecurring": false,
+        "recurringType": "one-time",
+        "startDate": "2025-08-01"
+      },
+      {
+        "id": "exp-022",
+        "name": "Flight to Lagos (dad's surgery)",
+        "amount": 10880,
+        "essential": true,
+        "isRecurring": false,
+        "recurringType": "one-time",
+        "startDate": "2025-10-01"
+      },
+      {
+        "id": "exp-023",
+        "name": "HMRC payment on account",
+        "amount": 15200,
+        "essential": true,
+        "isRecurring": false,
+        "recurringType": "one-time",
+        "startDate": "2026-03-01"
+      }
+    ],
+    "goals": [
+      {
+        "id": "goal-001",
+        "userId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "title": "4-bed house in Essex",
+        "category": "housing",
+        "priority": 1,
+        "description": "Need to move before Chidi starts secondary.",
+        "yearsRemaining": 2.2,
+        "current": 1568000,
+        "target": 2080000,
+        "completed": false,
+        "targetDate": "2028-09-01",
+        "monthlyContributionNeeded": 19392,
+        "probability": 91,
+        "createdAt": "2024-03-01T10:00:00.000Z",
+        "updatedAt": "2026-09-07T10:00:00.000Z"
+      },
+      {
+        "id": "goal-002",
+        "userId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "title": "University fund for Chidi and Adaeze",
+        "category": "education",
+        "priority": 2,
+        "description": "Tuition and rent for both.",
+        "yearsRemaining": 9,
+        "current": 616000,
+        "target": 1440000,
+        "completed": false,
+        "targetDate": "2035-09-01",
+        "monthlyContributionNeeded": 7632,
+        "probability": 94,
+        "createdAt": "2024-06-15T10:00:00.000Z",
+        "updatedAt": "2026-09-07T10:00:00.000Z"
+      },
+      {
+        "id": "goal-003",
+        "userId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "title": "Pay off Lagos mortgage early",
+        "category": "other",
+        "priority": 3,
+        "description": "Pay off the GTBank mortgage on Lekki.",
+        "yearsRemaining": 2.8,
+        "current": 268800,
+        "target": 608000,
+        "completed": false,
+        "targetDate": "2029-04-01",
+        "monthlyContributionNeeded": 10096,
+        "probability": 89,
+        "createdAt": "2025-02-01T10:00:00.000Z",
+        "updatedAt": "2026-09-07T10:00:00.000Z"
+      },
+      {
+        "id": "goal-004",
+        "userId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "title": "Ghana trip",
+        "category": "travel",
+        "priority": 4,
+        "description": "Two weeks in Accra and Cape Coast, December.",
+        "yearsRemaining": 0,
+        "current": 104000,
+        "target": 104000,
+        "completed": true,
+        "completedDate": "2025-12-28",
+        "targetDate": "2025-12-20",
+        "monthlyContributionNeeded": 0,
+        "probability": 100,
+        "createdAt": "2025-06-01T10:00:00.000Z",
+        "updatedAt": "2025-12-28T10:00:00.000Z"
+      }
+    ],
+    "goalsMeta": {
+      "totalMonthlyNeeded": 2320,
+      "totalGoals": 4,
+      "completedGoals": 1,
+      "activeGoals": 3
+    },
+    "holdings": [
+      {
+        "holding_id": "hold-001",
+        "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "asset_type": "etf",
+        "valuation_method": "market",
+        "name": "Vanguard FTSE All-World ETF",
+        "symbol": "VWRL",
+        "quantity": 128,
+        "cost_basis": 28672,
+        "current_value": 46336,
+        "initial_value": 28672,
+        "initial_value_date": "2021-06-01",
+        "is_active": true,
+        "created_at": "2021-06-01T10:00:00.000Z",
+        "updated_at": "2026-09-07T10:00:00.000Z",
+        "last_updated": "2026-09-07T10:00:00.000Z"
+      },
+      {
+        "holding_id": "hold-002",
+        "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "asset_type": "stock",
+        "valuation_method": "market",
+        "name": "Alphabet Inc.",
+        "symbol": "GOOGL",
+        "quantity": 58,
+        "cost_basis": 15104,
+        "current_value": 25728,
+        "initial_value": 15104,
+        "initial_value_date": "2022-08-01",
+        "is_active": true,
+        "created_at": "2022-08-01T10:00:00.000Z",
+        "updated_at": "2026-09-07T10:00:00.000Z",
+        "last_updated": "2026-09-07T10:00:00.000Z"
+      },
+      {
+        "holding_id": "hold-003",
+        "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "asset_type": "etf",
+        "valuation_method": "market",
+        "name": "iShares MSCI Emerging Markets ETF",
+        "symbol": "EEM",
+        "quantity": 190,
+        "cost_basis": 9216,
+        "current_value": 14336,
+        "initial_value": 9216,
+        "initial_value_date": "2023-04-01",
+        "is_active": true,
+        "created_at": "2023-04-01T10:00:00.000Z",
+        "updated_at": "2026-09-07T10:00:00.000Z",
+        "last_updated": "2026-09-07T10:00:00.000Z"
+      },
+      {
+        "holding_id": "hold-004",
+        "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "asset_type": "crypto",
+        "valuation_method": "market",
+        "name": "Ethereum",
+        "symbol": "ETH",
+        "quantity": 2.9,
+        "cost_basis": 10752,
+        "current_value": 20224,
+        "initial_value": 10752,
+        "initial_value_date": "2023-11-01",
+        "is_active": true,
+        "created_at": "2023-11-01T10:00:00.000Z",
+        "updated_at": "2026-09-07T10:00:00.000Z",
+        "last_updated": "2026-09-07T10:00:00.000Z"
+      },
+      {
+        "holding_id": "hold-005",
+        "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "asset_type": "mutual_fund",
+        "valuation_method": "market",
+        "name": "Nigeria Equity Fund (Stanbic IBTC)",
+        "symbol": "SBNICF",
+        "quantity": 4500,
+        "cost_basis": 8320,
+        "current_value": 14208,
+        "initial_value": 8320,
+        "initial_value_date": "2024-02-01",
+        "is_active": true,
+        "created_at": "2024-02-01T10:00:00.000Z",
+        "updated_at": "2026-09-07T10:00:00.000Z",
+        "last_updated": "2026-09-07T10:00:00.000Z"
+      },
+      {
+        "holding_id": "hold-006",
+        "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "asset_type": "cash",
+        "valuation_method": "manual",
+        "name": "Barclays ISA Cash",
+        "symbol": null,
+        "quantity": null,
+        "cost_basis": 26240,
+        "current_value": 28672,
+        "coupon_rate": 4.2,
+        "initial_value": 26240,
+        "initial_value_date": "2024-01-01",
+        "last_updated": "2026-09-07T10:00:00.000Z",
+        "is_active": true,
+        "created_at": "2024-01-01T10:00:00.000Z",
+        "updated_at": "2026-09-07T10:00:00.000Z"
+      },
+      {
+        "holding_id": "hold-007",
+        "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "asset_type": "bond",
+        "valuation_method": "market",
+        "name": "iShares Core UK Gilts UCITS ETF",
+        "symbol": "IGLT",
+        "quantity": 420,
+        "cost_basis": 12544,
+        "current_value": 13414,
+        "initial_value": 12544,
+        "initial_value_date": "2024-05-01",
+        "is_active": true,
+        "created_at": "2024-05-01T10:00:00.000Z",
+        "updated_at": "2026-09-07T10:00:00.000Z",
+        "last_updated": "2026-09-07T10:00:00.000Z"
+      },
+      {
+        "holding_id": "hold-008",
+        "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "asset_type": "stock",
+        "valuation_method": "market",
+        "name": "Microsoft Corp.",
+        "symbol": "MSFT",
+        "quantity": 28,
+        "cost_basis": 11776,
+        "current_value": 19021,
+        "initial_value": 11776,
+        "initial_value_date": "2023-01-15",
+        "is_active": true,
+        "created_at": "2023-01-15T10:00:00.000Z",
+        "updated_at": "2026-09-07T10:00:00.000Z",
+        "last_updated": "2026-09-07T10:00:00.000Z"
+      },
+      {
+        "holding_id": "hold-009",
+        "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "asset_type": "etf",
+        "valuation_method": "market",
+        "name": "Vanguard S&P 500 UCITS ETF",
+        "symbol": "VUSA",
+        "quantity": 95,
+        "cost_basis": 18176,
+        "current_value": 25139,
+        "initial_value": 18176,
+        "initial_value_date": "2022-03-01",
+        "is_active": true,
+        "created_at": "2022-03-01T10:00:00.000Z",
+        "updated_at": "2026-09-07T10:00:00.000Z",
+        "last_updated": "2026-09-07T10:00:00.000Z"
+      },
+      {
+        "holding_id": "hold-010",
+        "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "asset_type": "crypto",
+        "valuation_method": "market",
+        "name": "Bitcoin",
+        "symbol": "BTC",
+        "quantity": 0.18,
+        "cost_basis": 7936,
+        "current_value": 14694,
+        "initial_value": 7936,
+        "initial_value_date": "2024-01-20",
+        "is_active": true,
+        "created_at": "2024-01-20T10:00:00.000Z",
+        "updated_at": "2026-09-07T10:00:00.000Z",
+        "last_updated": "2026-09-07T10:00:00.000Z"
+      },
+      {
+        "holding_id": "hold-011",
+        "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "asset_type": "mutual_fund",
+        "valuation_method": "market",
+        "name": "Fidelity Global Dividend Fund",
+        "symbol": "FGDF",
+        "quantity": 1850,
+        "cost_basis": 15104,
+        "current_value": 17818,
+        "initial_value": 15104,
+        "initial_value_date": "2023-09-01",
+        "is_active": true,
+        "created_at": "2023-09-01T10:00:00.000Z",
+        "updated_at": "2026-09-07T10:00:00.000Z",
+        "last_updated": "2026-09-07T10:00:00.000Z"
+      },
+      {
+        "holding_id": "hold-012",
+        "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "asset_type": "alternative",
+        "valuation_method": "manual",
+        "name": "Funding Circle loans",
+        "symbol": null,
+        "quantity": null,
+        "cost_basis": 6400,
+        "current_value": 7014,
+        "initial_value": 6400,
+        "initial_value_date": "2024-08-01",
+        "is_active": true,
+        "created_at": "2024-08-01T10:00:00.000Z",
+        "updated_at": "2026-09-07T10:00:00.000Z",
+        "last_updated": "2026-09-07T10:00:00.000Z"
+      },
+      {
+        "holding_id": "hold-013",
+        "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "asset_type": "cash",
+        "valuation_method": "manual",
+        "name": "NS&I Premium Bonds",
+        "symbol": null,
+        "quantity": null,
+        "cost_basis": 19200,
+        "current_value": 19200,
+        "coupon_rate": 4,
+        "initial_value": 19200,
+        "initial_value_date": "2025-02-01",
+        "is_active": true,
+        "created_at": "2025-02-01T10:00:00.000Z",
+        "updated_at": "2026-09-07T10:00:00.000Z",
+        "last_updated": "2026-09-07T10:00:00.000Z"
+      },
+      {
+        "holding_id": "hold-014",
+        "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "asset_type": "stock",
+        "valuation_method": "market",
+        "name": "Unilever PLC",
+        "symbol": "ULVR",
+        "quantity": 160,
+        "cost_basis": 8192,
+        "current_value": 9626,
+        "initial_value": 8192,
+        "initial_value_date": "2023-06-01",
+        "is_active": true,
+        "created_at": "2023-06-01T10:00:00.000Z",
+        "updated_at": "2026-09-07T10:00:00.000Z",
+        "last_updated": "2026-09-07T10:00:00.000Z"
+      }
+    ],
+    "accounts": [
+      {
+        "id": "acc-001",
+        "name": "Barclays Current Account",
+        "institution": "Barclays",
+        "type": "cash",
+        "balance": 211200,
+        "currency": "GHS",
+        "updatedAt": "2026-09-07T10:00:00.000Z"
+      },
+      {
+        "id": "acc-002",
+        "name": "Vanguard Stocks & Shares ISA",
+        "institution": "Vanguard",
+        "type": "taxable",
+        "balance": 170767,
+        "currency": "USD",
+        "updatedAt": "2026-09-07T10:00:00.000Z"
+      },
+      {
+        "id": "acc-003",
+        "name": "AJ Bell SIPP",
+        "institution": "AJ Bell",
+        "type": "retirement",
+        "balance": 57344,
+        "currency": "USD",
+        "updatedAt": "2026-09-07T10:00:00.000Z"
+      }
+    ],
+    "propertyAssets": [
+      {
+        "property_id": "prop-001",
+        "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "name": "Stratford flat",
+        "property_type": "apartment",
+        "country": "GB",
+        "city": "London",
+        "locality": "Stratford",
+        "address": "14 Great Eastern Road, London E15 1BX",
+        "building_area_m2": 72,
+        "bedrooms": 2,
+        "bathrooms": 1,
+        "floors": 1,
+        "year_built": 2008,
+        "condition": "good",
+        "occupancy": "owner_occupied",
+        "field_sources": {
+          "locality": "client",
+          "address": "client",
+          "building_area_m2": "client",
+          "bedrooms": "client",
+          "bathrooms": "client",
+          "floors": "client",
+          "year_built": "client",
+          "condition": "client",
+          "occupancy": "client"
+        },
+        "purchase_date": "2021-03-10",
+        "purchase_price": 544000,
+        "market_value": 675840,
+        "current_value": 675840,
+        "value_uncertain": false,
+        "mortgage_balance": 407040,
+        "mortgage": {
+          "lender": "Nationwide",
+          "balance": 407040,
+          "interest_rate_pct": 4.12,
+          "term_years": 25,
+          "start_date": "2021-03-10",
+          "type": "repayment",
+          "min_payment_monthly": 2534,
+          "original_loan_amount": 435200,
+          "expected_payoff_date": "2046-03-10",
+          "due_day": 1
+        },
+        "is_primary": true,
+        "is_active": true,
+        "insurance": [
+          {
+            "insurance_id": "pins-001",
+            "type": "home",
+            "insurance_type": "homeowners",
+            "provider": "Aviva",
+            "policy_number": "AV-H-10021",
+            "coverage_amount": 652800,
+            "annual_premium": 1229,
+            "deductible": 500,
+            "expiry_date": "2027-03-10",
+            "renewal_date": "2027-03-10"
+          }
+        ],
+        "created_at": "2021-03-10T10:00:00.000Z",
+        "updated_at": "2026-09-07T10:00:00.000Z"
+      },
+      {
+        "property_id": "prop-002",
+        "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "name": "Lekki house",
+        "property_type": "house",
+        "country": "NG",
+        "city": "Lagos",
+        "locality": "Lekki",
+        "address": "22 Admiralty Way, Lekki, Lagos",
+        "land_area_m2": 450,
+        "building_area_m2": 280,
+        "bedrooms": 4,
+        "bathrooms": 3,
+        "floors": 2,
+        "year_built": 2012,
+        "condition": "good",
+        "occupancy": "owner_occupied",
+        "field_sources": {
+          "locality": "client",
+          "address": "client",
+          "land_area_m2": "client",
+          "building_area_m2": "client",
+          "bedrooms": "client",
+          "bathrooms": "client",
+          "floors": "client",
+          "year_built": "client",
+          "condition": "client",
+          "occupancy": "client"
+        },
+        "purchase_date": "2019-04-10",
+        "purchase_price": 74240,
+        "market_value": 143360,
+        "current_value": 143360,
+        "value_uncertain": false,
+        "mortgage_balance": 48640,
+        "mortgage": {
+          "lender": "GTBank",
+          "balance": 48640,
+          "interest_rate_pct": 18.5,
+          "term_years": 15,
+          "start_date": "2019-04-10",
+          "type": "repayment",
+          "min_payment_monthly": 435,
+          "original_loan_amount": 61440,
+          "expected_payoff_date": "2034-04-10",
+          "due_day": 15
+        },
+        "is_primary": false,
+        "is_active": true,
+        "insurance": [
+          {
+            "insurance_id": "pins-002",
+            "type": "home",
+            "insurance_type": "homeowners",
+            "provider": "Leadway Assurance",
+            "policy_number": "LW-H-44821",
+            "coverage_amount": 134400,
+            "annual_premium": 666,
+            "deductible": 200,
+            "expiry_date": "2026-11-01",
+            "renewal_date": "2026-11-01"
+          }
+        ],
+        "created_at": "2019-04-10T10:00:00.000Z",
+        "updated_at": "2026-09-07T10:00:00.000Z"
+      },
+      {
+        "property_id": "prop-003",
+        "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "name": "East Legon flat",
+        "property_type": "apartment",
+        "country": "GH",
+        "city": "Accra",
+        "locality": "East Legon",
+        "address": "8 Jungle Road, East Legon, Accra",
+        "building_area_m2": 95,
+        "bedrooms": 3,
+        "bathrooms": 2,
+        "floors": 1,
+        "year_built": 2016,
+        "condition": "excellent",
+        "occupancy": "rented",
+        "field_sources": {
+          "locality": "client",
+          "address": "client",
+          "building_area_m2": "client",
+          "bedrooms": "client",
+          "bathrooms": "client",
+          "floors": "client",
+          "year_built": "client",
+          "condition": "client",
+          "occupancy": "client"
+        },
+        "purchase_date": "2023-06-01",
+        "purchase_price": 92160,
+        "market_value": 120320,
+        "current_value": 120320,
+        "value_uncertain": false,
+        "mortgage_balance": 0,
+        "is_primary": false,
+        "is_active": true,
+        "insurance": [
+          {
+            "insurance_id": "pins-003",
+            "type": "home",
+            "insurance_type": "homeowners",
+            "provider": "Enterprise Insurance GH",
+            "policy_number": "EI-H-22019",
+            "coverage_amount": 120320,
+            "annual_premium": 742,
+            "deductible": 250,
+            "expiry_date": "2026-09-01",
+            "renewal_date": "2026-09-01"
+          }
+        ],
+        "created_at": "2023-06-01T10:00:00.000Z",
+        "updated_at": "2026-09-07T10:00:00.000Z"
+      },
+      {
+        "property_id": "prop-004",
+        "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "name": "Hackney rental",
+        "property_type": "house",
+        "country": "GB",
+        "city": "London",
+        "locality": "Hackney",
+        "address": "41 Broadway Market, London E8 4PH",
+        "land_area_m2": 120,
+        "building_area_m2": 110,
+        "bedrooms": 3,
+        "bathrooms": 2,
+        "floors": 2,
+        "year_built": 1895,
+        "condition": "fair",
+        "occupancy": "rented",
+        "field_sources": {
+          "locality": "client",
+          "address": "client",
+          "land_area_m2": "client",
+          "building_area_m2": "client",
+          "bedrooms": "client",
+          "bathrooms": "client",
+          "floors": "client",
+          "year_built": "client",
+          "condition": "client",
+          "occupancy": "client"
+        },
+        "purchase_date": "2023-11-01",
+        "purchase_price": 435200,
+        "market_value": 501760,
+        "current_value": 501760,
+        "value_uncertain": false,
+        "mortgage_balance": 291840,
+        "mortgage": {
+          "lender": "Barclays",
+          "balance": 291840,
+          "interest_rate_pct": 5.65,
+          "term_years": 25,
+          "start_date": "2023-11-01",
+          "type": "repayment",
+          "min_payment_monthly": 1818,
+          "original_loan_amount": 326400,
+          "expected_payoff_date": "2048-11-01",
+          "due_day": 1
+        },
+        "is_primary": false,
+        "is_active": true,
+        "insurance": [
+          {
+            "insurance_id": "pins-004",
+            "type": "landlord",
+            "insurance_type": "landlord",
+            "provider": "Direct Line",
+            "policy_number": "DL-L-88310",
+            "coverage_amount": 512000,
+            "annual_premium": 998,
+            "deductible": 400,
+            "expiry_date": "2027-02-15",
+            "renewal_date": "2027-02-15"
+          }
+        ],
+        "created_at": "2023-11-01T10:00:00.000Z",
+        "updated_at": "2026-09-07T10:00:00.000Z"
+      },
+      {
+        "property_id": "prop-005",
+        "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "name": "Manchester rental",
+        "property_type": "house",
+        "country": "GB",
+        "city": "Manchester",
+        "locality": "Didsbury",
+        "address": "9 Barlow Moor Road, Manchester M20 2RN",
+        "land_area_m2": 210,
+        "building_area_m2": 128,
+        "bedrooms": 3,
+        "bathrooms": 2,
+        "floors": 2,
+        "year_built": 1932,
+        "condition": "good",
+        "occupancy": "rented",
+        "field_sources": {
+          "locality": "client",
+          "address": "client",
+          "land_area_m2": "client",
+          "building_area_m2": "client",
+          "bedrooms": "client",
+          "bathrooms": "client",
+          "floors": "client",
+          "year_built": "client",
+          "condition": "client",
+          "occupancy": "client"
+        },
+        "purchase_date": "2024-07-01",
+        "purchase_price": 313600,
+        "market_value": 352000,
+        "current_value": 352000,
+        "value_uncertain": false,
+        "mortgage_balance": 189440,
+        "mortgage": {
+          "lender": "Halifax",
+          "balance": 189440,
+          "interest_rate_pct": 4.95,
+          "term_years": 25,
+          "start_date": "2024-07-01",
+          "type": "repayment",
+          "min_payment_monthly": 1178,
+          "original_loan_amount": 250880,
+          "expected_payoff_date": "2049-07-01",
+          "due_day": 12
+        },
+        "is_primary": false,
+        "is_active": true,
+        "insurance": [
+          {
+            "insurance_id": "pins-005",
+            "type": "landlord",
+            "insurance_type": "landlord",
+            "provider": "Aviva",
+            "policy_number": "AV-L-55201",
+            "coverage_amount": 364800,
+            "annual_premium": 691,
+            "deductible": 350,
+            "expiry_date": "2026-12-01",
+            "renewal_date": "2026-12-01"
+          }
+        ],
+        "created_at": "2024-07-01T10:00:00.000Z",
+        "updated_at": "2026-09-07T10:00:00.000Z"
+      },
+      {
+        "property_id": "prop-006",
+        "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "name": "Atlanta condo",
+        "property_type": "condo",
+        "country": "US",
+        "city": "Atlanta",
+        "locality": "Buckhead",
+        "address": "3344 Peachtree Road NE, Atlanta, GA 30326",
+        "building_area_m2": 110,
+        "bedrooms": 2,
+        "bathrooms": 2,
+        "floors": 1,
+        "year_built": 2018,
+        "condition": "excellent",
+        "occupancy": "rented",
+        "field_sources": {
+          "locality": "client",
+          "address": "client",
+          "building_area_m2": "client",
+          "bedrooms": "client",
+          "bathrooms": "client",
+          "floors": "client",
+          "year_built": "client",
+          "condition": "client",
+          "occupancy": "client"
+        },
+        "purchase_date": "2025-02-15",
+        "purchase_price": 343040,
+        "market_value": 396800,
+        "current_value": 396800,
+        "value_uncertain": false,
+        "mortgage_balance": 250880,
+        "mortgage": {
+          "lender": "Wells Fargo",
+          "balance": 250880,
+          "interest_rate_pct": 6.85,
+          "term_years": 30,
+          "start_date": "2025-02-15",
+          "type": "repayment",
+          "min_payment_monthly": 1645,
+          "original_loan_amount": 273920,
+          "expected_payoff_date": "2055-02-15",
+          "due_day": 5
+        },
+        "is_primary": false,
+        "is_active": true,
+        "insurance": [
+          {
+            "insurance_id": "pins-006",
+            "type": "landlord",
+            "insurance_type": "landlord",
+            "provider": "State Farm",
+            "policy_number": "SF-L-99120",
+            "coverage_amount": 409600,
+            "annual_premium": 1587,
+            "deductible": 1000,
+            "expiry_date": "2027-02-15",
+            "renewal_date": "2027-02-15"
+          }
+        ],
+        "created_at": "2025-02-15T10:00:00.000Z",
+        "updated_at": "2026-09-07T10:00:00.000Z"
+      }
+    ],
+    "liabilities": [
+      {
+        "id": "liab-001",
+        "name": "RAV4 loan",
+        "lender": "Toyota Financial Services",
+        "type": "auto_loan",
+        "balance": 188800,
+        "interestRatePct": 7.4,
+        "minPaymentMonthly": 6160,
+        "dueDay": 12,
+        "originalLoanAmount": 312000,
+        "expectedPayoffDate": "2028-02-01",
+        "updatedAt": "2026-09-07T10:00:00.000Z"
+      },
+      {
+        "id": "liab-002",
+        "name": "Barclaycard Avios",
+        "lender": "Barclays",
+        "type": "credit_card",
+        "balance": 38400,
+        "interestRatePct": 23.9,
+        "minPaymentMonthly": 1152,
+        "dueDay": 18,
+        "originalLoanAmount": null,
+        "expectedPayoffDate": null,
+        "updatedAt": "2026-09-07T10:00:00.000Z"
+      }
+    ],
+    "insurancePolicies": [
+      {
+        "policy_id": "pol-001",
+        "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "category": "life",
+        "provider": "Legal & General",
+        "name": "Term Life Cover",
+        "policy_number": "LG-TL-884422",
+        "coverage_amount": 7200000,
+        "premium_monthly": 1088,
+        "deductible": 0,
+        "start_date": "2021-09-01",
+        "renewal_date": "2041-09-01",
+        "auto_renew": false,
+        "beneficiary": "Sarah Richardson (spouse)",
+        "notes": "Pays out if I die. Covers the mortgage and school fees.",
+        "is_active": true,
+        "created_at": "2021-09-01T10:00:00.000Z",
+        "updated_at": "2026-09-07T10:00:00.000Z"
+      },
+      {
+        "policy_id": "pol-002",
+        "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "category": "health",
+        "provider": "Bupa",
+        "name": "Bupa Family Health",
+        "policy_number": "BUPA-F-2200193",
+        "coverage_amount": 2400000,
+        "premium_monthly": 1872,
+        "deductible": 4000,
+        "start_date": "2023-01-01",
+        "renewal_date": "2027-01-01",
+        "auto_renew": true,
+        "beneficiary": "Bill Richardson + Family",
+        "notes": "Family GP and inpatient cover.",
+        "is_active": true,
+        "created_at": "2023-01-01T10:00:00.000Z",
+        "updated_at": "2026-09-07T10:00:00.000Z"
+      },
+      {
+        "policy_id": "pol-003",
+        "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "category": "disability",
+        "provider": "Zurich",
+        "name": "Income protection, 60% salary",
+        "policy_number": "ZU-IP-5539871",
+        "coverage_amount": 898560,
+        "premium_monthly": 832,
+        "deductible": 0,
+        "start_date": "2022-03-01",
+        "renewal_date": "2032-03-01",
+        "auto_renew": true,
+        "notes": "Pays 60% of salary. Three-month wait.",
+        "is_active": true,
+        "created_at": "2022-03-01T10:00:00.000Z",
+        "updated_at": "2026-09-07T10:00:00.000Z"
+      },
+      {
+        "policy_id": "pol-004",
+        "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "category": "auto",
+        "provider": "Admiral",
+        "name": "Toyota RAV4 Comprehensive",
+        "policy_number": "ADM-AU-7721904",
+        "coverage_amount": 448000,
+        "premium_monthly": 1184,
+        "deductible": 8000,
+        "start_date": "2026-08-01",
+        "renewal_date": "2027-08-01",
+        "auto_renew": true,
+        "notes": "Fully comp. Covers Europe for Ghana trips.",
+        "is_active": true,
+        "created_at": "2025-08-01T10:00:00.000Z",
+        "updated_at": "2026-09-07T10:00:00.000Z"
+      }
+    ],
+    "retirement": {
+      "currentAge": 37,
+      "retirementAge": 60,
+      "lifeExpectancy": 88,
+      "currentInvested": 286497,
+      "monthlySavings": 17600,
+      "existingPensionBalance": 57344,
+      "monthlyPensionContribution": 8320,
+      "expectedReturnPct": 7,
+      "inflationPct": 2.5,
+      "safeWithdrawalRatePct": 4,
+      "desiredMonthlyIncome": 67200
+    },
+    "emergencyFund": {
+      "targetMonths": 6,
+      "currentCashBalance": 617600,
+      "storageLocation": "Barclays easy-access savings",
+      "includeAccountIds": [
+        "acc-001"
+      ],
+      "updatedAt": "2026-09-07T10:00:00.000Z",
+      "computed": {
+        "monthlyBaseline": 94432,
+        "targetAmount": 566592,
+        "runwayMonths": 6.5,
+        "fundedPct": 100,
+        "shortfall": 0
+      }
+    },
+    "cashFlowHistory": [
+      {
+        "month": "2025-10",
+        "income": 168480,
+        "expenses": 125440,
+        "surplus": 43040
+      },
+      {
+        "month": "2025-11",
+        "income": 168480,
+        "expenses": 97920,
+        "surplus": 70560
+      },
+      {
+        "month": "2025-12",
+        "income": 237280,
+        "expenses": 142720,
+        "surplus": 94560
+      },
+      {
+        "month": "2026-01",
+        "income": 168480,
+        "expenses": 106880,
+        "surplus": 61600
+      },
+      {
+        "month": "2026-02",
+        "income": 168480,
+        "expenses": 102720,
+        "surplus": 65760
+      },
+      {
+        "month": "2026-03",
+        "income": 168480,
+        "expenses": 115840,
+        "surplus": 52640
+      },
+      {
+        "month": "2026-04",
+        "income": 194080,
+        "expenses": 109120,
+        "surplus": 84960
+      },
+      {
+        "month": "2026-05",
+        "income": 225920,
+        "expenses": 94432,
+        "surplus": 131488
+      },
+      {
+        "month": "2026-06",
+        "income": 168480,
+        "expenses": 96800,
+        "surplus": 71680
+      },
+      {
+        "month": "2026-07",
+        "income": 203680,
+        "expenses": 98880,
+        "surplus": 104800
+      },
+      {
+        "month": "2026-08",
+        "income": 168480,
+        "expenses": 97920,
+        "surplus": 70560
+      },
+      {
+        "month": "2026-09",
+        "income": 168480,
+        "expenses": 95680,
+        "surplus": 72640
+      }
+    ],
+    "cashFlowSummary": {
+      "dashboard_currency": "GHS",
+      "current_month": {
+        "totalIncome": 168480,
+        "totalExpenses": 95680,
+        "surplus": 72640,
+        "savingsRate": 43.1,
+        "burnRate": 95680
+      },
+      "month_over_month": {
+        "incomeChange_pct": 0,
+        "expenseChange_pct": -2.3,
+        "surplusChange_pct": 2.9
+      },
+      "averages": {
+        "avgMonthlyIncome": 184064,
+        "avgMonthlyExpenses": 107376,
+        "avgMonthlySurplus": 76688,
+        "based_on_months": 12
+      },
+      "monthly_income": 168480,
+      "monthly_expenses": 94432,
+      "monthly_surplus": 74048,
+      "savings_rate_pct": 43.9,
+      "currency": "GHS"
+    },
+    "portfolioPerformance": [
+      {
+        "month": "2025-10",
+        "value": 202580,
+        "contributions": 1600
+      },
+      {
+        "month": "2025-11",
+        "value": 206341,
+        "contributions": 1600
+      },
+      {
+        "month": "2025-12",
+        "value": 211185,
+        "contributions": 1600
+      },
+      {
+        "month": "2026-01",
+        "value": 217112,
+        "contributions": 1600
+      },
+      {
+        "month": "2026-02",
+        "value": 224123,
+        "contributions": 1600
+      },
+      {
+        "month": "2026-03",
+        "value": 232218,
+        "contributions": 1600
+      },
+      {
+        "month": "2026-04",
+        "value": 241395,
+        "contributions": 1600
+      },
+      {
+        "month": "2026-05",
+        "value": 251657,
+        "contributions": 1600
+      },
+      {
+        "month": "2026-06",
+        "value": 263002,
+        "contributions": 1600
+      },
+      {
+        "month": "2026-07",
+        "value": 275430,
+        "contributions": 1600
+      },
+      {
+        "month": "2026-08",
+        "value": 279859,
+        "contributions": 1600
+      },
+      {
+        "month": "2026-09",
+        "value": 286497,
+        "contributions": 1600
+      }
+    ],
+    "allocation": [
+      {
+        "label": "Property",
+        "value": 939520,
+        "percentage": 77
+      },
+      {
+        "label": "Equities",
+        "value": 140186,
+        "percentage": 12
+      },
+      {
+        "label": "Cash",
+        "value": 47872,
+        "percentage": 4
+      },
+      {
+        "label": "Crypto",
+        "value": 34918,
+        "percentage": 3
+      },
+      {
+        "label": "Dividend funds",
+        "value": 32026,
+        "percentage": 3
+      },
+      {
+        "label": "Bonds",
+        "value": 13414,
+        "percentage": 1
+      },
+      {
+        "label": "Other",
+        "value": 7014,
+        "percentage": 1
+      }
+    ],
+    "taxProfile": {
+      "effectiveTaxRatePct": 32,
+      "marginalTaxRatePct": 40,
+      "filingStatus": "married",
+      "stateOrRegion": "England",
+      "updatedAt": "2026-09-07T10:00:00.000Z"
+    },
+    "dependents": [
+      {
+        "id": "dep-001",
+        "name": "Chidi Richardson",
+        "relationship": "Son",
+        "dateOfBirth": "2016-11-08",
+        "financialReliance": "full",
+        "notes": "Year 4. Plays football. After-school clubs eat the budget."
+      },
+      {
+        "id": "dep-002",
+        "name": "Adaeze Richardson",
+        "relationship": "Daughter",
+        "dateOfBirth": "2019-05-14",
+        "financialReliance": "full",
+        "notes": "Year 1. Started swimming this term."
+      }
+    ],
+    "freshness": [
+      {
+        "section": "income",
+        "updatedAt": "2026-09-07T10:00:00.000Z"
+      },
+      {
+        "section": "expenses",
+        "updatedAt": "2026-09-07T10:00:00.000Z"
+      },
+      {
+        "section": "goals",
+        "updatedAt": "2026-09-07T10:00:00.000Z"
+      },
+      {
+        "section": "assets",
+        "updatedAt": "2026-09-07T10:00:00.000Z"
+      },
+      {
+        "section": "properties",
+        "updatedAt": "2026-09-07T10:00:00.000Z"
+      },
+      {
+        "section": "insurance",
+        "updatedAt": "2026-09-07T10:00:00.000Z"
+      },
+      {
+        "section": "retirement",
+        "updatedAt": "2026-09-07T10:00:00.000Z"
+      },
+      {
+        "section": "liabilities",
+        "updatedAt": "2026-09-07T10:00:00.000Z"
+      },
+      {
+        "section": "portfolio",
+        "updatedAt": "2026-09-07T10:00:00.000Z"
+      }
+    ],
+    "profileCompletionScore": 100
+  },
+  "version": 0,
+  "_meta": {
+    "description": "Bill Richardson. Consultant in Stratford. Property in four countries. About GH₵74k surplus most months.",
+    "currency": "GHS",
+    "generatedAt": "2026-09-07T00:00:00.000Z",
+    "monthlyCashFlow": {
+      "recurringIncome": 168480,
+      "recurringExpenses": 94432,
+      "recurringSurplus": 74048,
+      "savingsRatePct": 43.9
+    },
+    "portfolioHoldings": 14,
+    "portfolioValue": 286497,
+    "investment_currency": "USD",
+    "ghs_per_usd": 12.5
+  }
+}

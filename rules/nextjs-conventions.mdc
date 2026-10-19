@@ -1,0 +1,22 @@
+---
+description: Next.js conventions
+alwaysApply: true
+---
+
+Use the App Router.
+
+Prefer Server Components.
+
+Only use Client Components when necessary.
+
+Minimize client-side JavaScript.
+
+Keep data fetching close to where data is used.
+
+Avoid unnecessary API routes.
+
+Prefer server actions when appropriate.
+
+Keep routing predictable.
+
+Do not create unnecessary wrappers.

@@ -1,0 +1,23 @@
+---
+description: TypeScript rules
+alwaysApply: true
+---
+
+Use strict TypeScript.
+
+Never use:
+
+- any
+- @ts-ignore
+- unnecessary type assertions
+
+Prefer:
+
+- interfaces
+- discriminated unions
+- generics
+- inferred types
+
+Type everything explicitly where it improves readability.
+
+Fix type errors instead of hiding them.

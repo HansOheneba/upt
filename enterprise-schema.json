@@ -1,0 +1,189 @@
+{
+  "description": "Enterprise entity relational schema for the Celerey backend. Build these tables alongside the core users table. PostgreSQL recommended. All IDs are UUIDs.",
+  "database": "PostgreSQL (recommended)",
+  "note": "This schema covers only the enterprise-specific tables. The full users table is maintained separately — only the enterprise-relevant columns are shown here for reference.",
+
+  "tables": {
+    "companies": {
+      "description": "An enterprise company that sponsors Celerey seat-based access for its employees. Created by a Celerey admin.",
+      "columns": {
+        "company_id": "UUID          PRIMARY KEY DEFAULT gen_random_uuid()",
+        "company_name": "VARCHAR(255)  NOT NULL",
+        "contact_email": "VARCHAR(255)  NOT NULL UNIQUE — primary billing / admin contact",
+        "seat_limit": "INTEGER       NOT NULL DEFAULT 10 — maximum number of active seats this company can have",
+        "seats_used": "INTEGER       NOT NULL DEFAULT 0  — trigger-maintained running count of active seats",
+        "is_active": "BOOLEAN       NOT NULL DEFAULT TRUE — set FALSE to suspend all company seats",
+        "notes": "TEXT          NULL — internal Celerey admin notes",
+        "created_at": "TIMESTAMPTZ   NOT NULL DEFAULT NOW()",
+        "updated_at": "TIMESTAMPTZ   NOT NULL DEFAULT NOW()"
+      },
+      "indexes": [
+        "CREATE INDEX idx_companies_contact_email ON companies (contact_email)",
+        "CREATE INDEX idx_companies_is_active     ON companies (is_active)"
+      ]
+    },
+
+    "company_seats": {
+      "description": "Join table linking an individual user to an enterprise company. A user may only hold one active seat at a time. Supports pre-provisioning (invite by email before the user has registered).",
+      "columns": {
+        "seat_id": "UUID          PRIMARY KEY DEFAULT gen_random_uuid()",
+        "company_id": "UUID          NOT NULL REFERENCES companies(company_id) ON DELETE CASCADE",
+        "user_id": "UUID          NULL     REFERENCES users(user_id) ON DELETE SET NULL — NULL until the invited user completes registration",
+        "invite_email": "VARCHAR(255)  NOT NULL — the email the seat was provisioned for; used as the natural key for pre-provisioned seats",
+        "invite_accepted_at": "TIMESTAMPTZ   NULL     — set when the user registers and links their account to this seat",
+        "seat_granted_at": "TIMESTAMPTZ   NOT NULL DEFAULT NOW()",
+        "seat_granted_by": "VARCHAR(255)  NULL     — admin name or email for audit trail",
+        "seat_revoked_at": "TIMESTAMPTZ   NULL     — NULL = still active; set to NOW() on revocation",
+        "is_active": "BOOLEAN       NOT NULL DEFAULT TRUE",
+        "created_at": "TIMESTAMPTZ   NOT NULL DEFAULT NOW()",
+        "updated_at": "TIMESTAMPTZ   NOT NULL DEFAULT NOW()"
+      },
+      "constraints": [
+        "UNIQUE (user_id) WHERE is_active = TRUE AND user_id IS NOT NULL — a user can only be on one active seat at a time",
+        "UNIQUE (company_id, invite_email) WHERE is_active = TRUE — no duplicate active seats for the same email within a company"
+      ],
+      "indexes": [
+        "CREATE INDEX idx_seats_company_id  ON company_seats (company_id)",
+        "CREATE INDEX idx_seats_user_id     ON company_seats (user_id)",
+        "CREATE INDEX idx_seats_invite_email ON company_seats (invite_email)",
+        "CREATE INDEX idx_seats_is_active   ON company_seats (is_active)"
+      ],
+      "triggers": {
+        "after_seat_activated": "AFTER INSERT or UPDATE SET is_active = TRUE  → INCREMENT companies.seats_used WHERE company_id = NEW.company_id",
+        "after_seat_deactivated": "AFTER UPDATE SET is_active = FALSE            → DECREMENT companies.seats_used WHERE company_id = NEW.company_id"
+      }
+    },
+
+    "users_enterprise_columns": {
+      "description": "These columns must exist on the core users table. Shown here for reference — not a standalone table.",
+      "columns": {
+        "user_id": "UUID          PRIMARY KEY",
+        "email": "VARCHAR(255)  UNIQUE NOT NULL",
+        "user_type": "VARCHAR(20)   NOT NULL DEFAULT 'regular' CHECK (user_type IN ('regular', 'enterprise'))",
+        "subscription_status": "VARCHAR(20)   NOT NULL DEFAULT 'none'    CHECK (subscription_status IN ('none', 'trialing', 'active'))",
+        "risk_profile": "VARCHAR(20)   NULL    CHECK (risk_profile IN ('conservative', 'moderate', 'aggressive'))"
+      },
+      "note": "When a seat is granted: set user_type = 'enterprise' AND subscription_status = 'active'. When a seat is revoked: set user_type = 'regular' AND subscription_status = 'none'."
+    }
+  },
+
+  "relationships": [
+    {
+      "from": "companies",
+      "to": "company_seats",
+      "type": "one-to-many",
+      "join": "company_seats.company_id = companies.company_id",
+      "description": "A company has many seats (active and historical)"
+    },
+    {
+      "from": "users",
+      "to": "company_seats",
+      "type": "one-to-one (active)",
+      "join": "company_seats.user_id = users.user_id WHERE company_seats.is_active = TRUE",
+      "description": "A user can have at most one active seat at any point in time"
+    },
+    {
+      "from": "company_seats",
+      "to": "users",
+      "type": "many-to-one",
+      "join": "company_seats.user_id = users.user_id",
+      "description": "Historical seats (is_active = FALSE) are retained for audit — a user may have had seats at multiple companies over time"
+    }
+  ],
+
+  "views": {
+    "v_active_company_seats": {
+      "description": "Convenience view: all active seats with company and user details — use this for the admin seat management screen",
+      "sql": [
+        "CREATE OR REPLACE VIEW v_active_company_seats AS",
+        "SELECT",
+        "  cs.seat_id,",
+        "  cs.company_id,",
+        "  c.company_name,",
+        "  c.seat_limit,",
+        "  c.seats_used,",
+        "  cs.user_id,",
+        "  u.email,",
+        "  u.display_name,",
+        "  u.first_name,",
+        "  u.last_name,",
+        "  cs.invite_email,",
+        "  cs.seat_granted_at,",
+        "  cs.seat_granted_by,",
+        "  cs.invite_accepted_at,",
+        "  CASE WHEN cs.user_id IS NULL THEN 'pending' ELSE 'active' END AS seat_status",
+        "FROM company_seats cs",
+        "JOIN companies c ON c.company_id = cs.company_id",
+        "LEFT JOIN users u ON u.user_id = cs.user_id",
+        "WHERE cs.is_active = TRUE",
+        "ORDER BY c.company_name, cs.seat_granted_at"
+      ]
+    },
+
+    "v_company_summary": {
+      "description": "Per-company seat usage summary — use this for the admin companies list",
+      "sql": [
+        "CREATE OR REPLACE VIEW v_company_summary AS",
+        "SELECT",
+        "  c.company_id,",
+        "  c.company_name,",
+        "  c.contact_email,",
+        "  c.seat_limit,",
+        "  c.seats_used,",
+        "  c.seat_limit - c.seats_used AS seats_available,",
+        "  c.is_active,",
+        "  COUNT(cs.seat_id) FILTER (WHERE cs.is_active = TRUE AND cs.user_id IS NOT NULL)  AS confirmed_seats,",
+        "  COUNT(cs.seat_id) FILTER (WHERE cs.is_active = TRUE AND cs.user_id IS NULL)      AS pending_invites,",
+        "  c.created_at",
+        "FROM companies c",
+        "LEFT JOIN company_seats cs ON cs.company_id = c.company_id",
+        "GROUP BY c.company_id",
+        "ORDER BY c.company_name"
+      ]
+    }
+  },
+
+  "businessLogic": {
+    "provisionSeat": {
+      "description": "Grant a user enterprise access",
+      "steps": [
+        "1. Check companies.seats_used < companies.seat_limit — return 409 if at capacity",
+        "2. Look up users.user_id by invite_email",
+        "3a. If user exists: INSERT company_seats (company_id, user_id, invite_email, invite_accepted_at = NOW(), seat_granted_by); UPDATE users SET user_type = 'enterprise', subscription_status = 'active' WHERE user_id = :userId",
+        "3b. If user does not exist: INSERT company_seats (company_id, user_id = NULL, invite_email, seat_granted_by); send invite email; user links account on registration (see linkSeatOnRegistration)",
+        "4. Trigger increments companies.seats_used automatically"
+      ]
+    },
+    "linkSeatOnRegistration": {
+      "description": "Called when a pre-provisioned user completes sign-up",
+      "steps": [
+        "1. After user row is created, look up company_seats WHERE invite_email = new user's email AND is_active = TRUE AND user_id IS NULL",
+        "2. If found: UPDATE company_seats SET user_id = :newUserId, invite_accepted_at = NOW()",
+        "3. UPDATE users SET user_type = 'enterprise', subscription_status = 'active' WHERE user_id = :newUserId"
+      ]
+    },
+    "revokeSeat": {
+      "description": "Remove enterprise access from a user",
+      "steps": [
+        "1. UPDATE company_seats SET is_active = FALSE, seat_revoked_at = NOW() WHERE seat_id = :seatId",
+        "2. UPDATE users SET user_type = 'regular', subscription_status = 'none' WHERE user_id = :userId",
+        "3. Trigger decrements companies.seats_used automatically"
+      ]
+    },
+    "suspendCompany": {
+      "description": "Suspend all users for a company (e.g. non-payment)",
+      "steps": [
+        "1. UPDATE companies SET is_active = FALSE WHERE company_id = :companyId",
+        "2. UPDATE users SET user_type = 'regular', subscription_status = 'none' WHERE user_id IN (SELECT user_id FROM company_seats WHERE company_id = :companyId AND is_active = TRUE AND user_id IS NOT NULL)",
+        "3. Note: company_seats rows remain intact so the company can be re-activated without re-provisioning"
+      ]
+    }
+  },
+
+  "sampleQueries": {
+    "listSeatsForCompany": "SELECT * FROM v_active_company_seats WHERE company_id = ':companyId'",
+    "checkIfUserHasActiveSeat": "SELECT cs.*, c.company_name FROM company_seats cs JOIN companies c ON c.company_id = cs.company_id WHERE cs.user_id = ':userId' AND cs.is_active = TRUE LIMIT 1",
+    "companiesNearSeatLimit": "SELECT * FROM v_company_summary WHERE seats_used >= seat_limit * 0.9 AND is_active = TRUE",
+    "pendingInvitesOlderThan7Days": "SELECT * FROM company_seats WHERE user_id IS NULL AND is_active = TRUE AND seat_granted_at < NOW() - INTERVAL '7 days'"
+  }
+}

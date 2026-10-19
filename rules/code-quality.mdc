@@ -1,0 +1,29 @@
+---
+description: Code quality
+alwaysApply: true
+---
+
+Do not write code that merely works.
+
+Write code that another developer can confidently maintain.
+
+Every change should:
+
+- have a clear purpose
+- use descriptive naming
+- follow existing project conventions
+- avoid duplication
+
+Before introducing new utilities:
+
+Search for an existing implementation.
+
+Reuse before creating.
+
+Prefer consistency over novelty.
+
+Avoid magic numbers.
+
+Avoid hidden side effects.
+
+Avoid unnecessary dependencies.
