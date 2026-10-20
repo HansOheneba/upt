@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Bar, BarChart, XAxis, YAxis } from "recharts";
 import { FileText } from "lucide-react";
 import { DashboardEmptyState } from "@/components/dashboard/empty-state";
@@ -28,22 +28,67 @@ const chartConfig = {
   amount: { label: "Contributions", color: "var(--brand-primary)" },
 } satisfies ChartConfig;
 
+const Y_AXIS_WIDTH = 78;
+/** Widest month tick, plus a small gap, so neighbours cannot touch. */
+const SHORT_LABEL = 30;
+const YEAR_LABEL = 50;
+
+/**
+ * Indexes of month labels that fit in the plot. Always includes the first
+ * and last month when there is more than one point. Neighbouring picks stay
+ * far enough apart that the text does not collide.
+ */
+function monthLabelIndexes(count: number, chartWidth: number, labelWidth: number): number[] {
+  if (count <= 0) return [];
+  if (count === 1) return [0];
+  const plot = Math.max(labelWidth, chartWidth - Y_AXIS_WIDTH);
+  const minApart = Math.max(1, Math.ceil(labelWidth / (plot / count)));
+  const indexes = [0];
+  for (let index = minApart; index < count - 1; index += minApart) indexes.push(index);
+  indexes.push(count - 1);
+  const last = indexes.length - 1;
+  if (last >= 1 && indexes[last] - indexes[last - 1] < minApart) {
+    indexes.splice(last - 1, 1);
+  }
+  return indexes;
+}
+
 export function ContributionHistoryChart({
   contributions,
 }: {
   contributions: Contribution[];
 }) {
   const [range, setRange] = useState<ContributionChartRange>("12");
+  const chartRef = useRef<HTMLDivElement>(null);
+  const [chartWidth, setChartWidth] = useState(0);
   const points = useMemo(
     () => monthlyContributionSeries(contributions, range),
     [contributions, range],
   );
   const axisDigits = points.every((point) => Number.isInteger(point.amount)) ? 0 : 2;
-  const tickInterval = points.length <= 12 ? 0 : Math.ceil(points.length / 6) - 1;
-  const periodTotal = points.reduce((sum, point) => sum + point.amount, 0);
+  const chartPoints = useMemo(() => {
+    const labelWidth = points.length > 16 ? YEAR_LABEL : SHORT_LABEL;
+    const visible = new Set(monthLabelIndexes(points.length, chartWidth || 320, labelWidth));
+    return points.map((point, index) =>
+      visible.has(index) ? point : { ...point, tick: "" },
+    );
+  }, [points, chartWidth]);
+
   const hasHistory = contributions.some(
     (row) => Number.isFinite(row.amount) && /^\d{4}-\d{2}/.test(row.date ?? ""),
   );
+  const showChart = hasHistory && points.length > 0;
+  useLayoutEffect(() => {
+    if (!showChart) return;
+    const node = chartRef.current;
+    if (!node) return;
+    const measure = () => setChartWidth(node.clientWidth);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [showChart]);
+  const periodTotal = points.reduce((sum, point) => sum + point.amount, 0);
 
   return (
     <div className="flex h-full flex-col gap-4">
@@ -91,39 +136,40 @@ export function ContributionHistoryChart({
         />
       ) : (
         <>
-          <ChartContainer
-            config={chartConfig}
-            className="aspect-auto h-64 w-full"
-            aria-label="Monthly contribution amounts in Ghana cedis"
-          >
-            <BarChart data={points} margin={{ top: 8, right: 4, left: 0, bottom: 0 }}>
-              <XAxis
-                dataKey="tick"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                interval={tickInterval}
-                minTickGap={16}
-              />
-              <YAxis
-                tickLine={false}
-                axisLine={false}
-                width={78}
-                tickFormatter={(value: number) => formatGhs(Number(value), axisDigits)}
-                domain={[0, (dataMax: number) => (dataMax > 0 ? dataMax : 1)]}
-              />
-              <ChartTooltip
-                cursor={{ fill: "color-mix(in srgb, var(--brand-primary) 8%, transparent)" }}
-                content={<ContributionTooltip />}
-              />
-              <Bar
-                dataKey="amount"
-                fill="var(--brand-primary)"
-                radius={[2, 2, 0, 0]}
-                maxBarSize={28}
-              />
-            </BarChart>
-          </ChartContainer>
+          <div ref={chartRef} className="w-full min-w-0">
+            <ChartContainer
+              config={chartConfig}
+              className="aspect-auto h-64 w-full"
+              aria-label="Monthly contribution amounts in Ghana cedis"
+            >
+              <BarChart data={chartPoints} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                <XAxis
+                  dataKey="tick"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  interval={0}
+                />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  width={Y_AXIS_WIDTH}
+                  tickFormatter={(value: number) => formatGhs(Number(value), axisDigits)}
+                  domain={[0, (dataMax: number) => (dataMax > 0 ? dataMax : 1)]}
+                />
+                <ChartTooltip
+                  cursor={{ fill: "color-mix(in srgb, var(--brand-primary) 8%, transparent)" }}
+                  content={<ContributionTooltip />}
+                />
+                <Bar
+                  dataKey="amount"
+                  fill="var(--brand-primary)"
+                  radius={[2, 2, 0, 0]}
+                  maxBarSize={28}
+                />
+              </BarChart>
+            </ChartContainer>
+          </div>
           <ul className="sr-only">
             {points.map((point) => (
               <li key={point.key}>
