@@ -11,6 +11,14 @@ const nextConfig = {
         destination: "/icon",
       },
       {
+        source: "/demo/dashboard",
+        destination: "/dashboard",
+      },
+      {
+        source: "/demo/dashboard/:path*",
+        destination: "/dashboard/:path*",
+      },
+      {
         source: "/api/proxy/onboarding.generate-otp",
         destination: "/api/otp-proxy/onboarding.generate-otp",
       },

@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { isDemoPath } from "@/lib/demo-mode";
+import { isDemoPath, toDemoPath } from "@/lib/demo-mode";
 
 /** Legacy route: /dashboard/advisor?tab=… → new sidebar destinations. */
 export default function LegacyAdvisorRedirect() {
@@ -12,7 +12,7 @@ export default function LegacyAdvisorRedirect() {
 
   useEffect(() => {
     const tab = searchParams.get("tab");
-    const base = isDemoPath(pathname) ? "/dashboard/demo" : "/dashboard";
+    const base = isDemoPath(pathname) ? toDemoPath("/dashboard") : "/dashboard";
 
     if (tab === "messages") {
       router.replace(`${base}/messages`);

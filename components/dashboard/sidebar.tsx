@@ -75,7 +75,7 @@ import { useClientGate } from "@/hooks/useClientGate";
 import { useEffect, useMemo, useState } from "react";
 import { useProfilePanel } from "./profile-panel-context";
 import { useMockUpgrade } from "@/hooks/useMockUpgrade";
-import { isDemoPath, toDemoPath } from "@/lib/demo-mode";
+import { isDemoMode, isDemoPath, toDemoPath } from "@/lib/demo-mode";
 import { brand } from "@/lib/tenant";
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 
@@ -149,6 +149,9 @@ const pensionNavSections: NavSection[] = [
       { label: "Statement", href: "/dashboard/statement", icon: faFileLines },
     ],
   },
+  ...wealthNavSections.filter(
+    (section) => section.label && section.label !== "Insights",
+  ),
 ];
 
 export default function DashboardSidebar() {
@@ -186,11 +189,10 @@ export default function DashboardSidebar() {
     (s) => s.profileCompletionScore,
   );
   const { isOpen, open: openProfilePanel } = useProfilePanel();
-  const inDemo = isDemoPath(pathname);
+  const inDemo = isDemoPath(pathname) || (mounted && isDemoMode());
   const pensionNav = brand.id === "upt";
   const navSections = pensionNav ? pensionNavSections : wealthNavSections;
-  const navHref = (href: string) =>
-    inDemo && !pensionNav ? toDemoPath(href) : href;
+  const navHref = (href: string) => (inDemo ? toDemoPath(href) : href);
   const homeHref = inDemo ? toDemoPath("/dashboard") : "/dashboard";
 
   // ── Attention badges: incomplete checklist items mapped to their nav href ──

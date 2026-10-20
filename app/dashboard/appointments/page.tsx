@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { AdvisorySectionPage } from "@/components/dashboard/advisor/advisory-section-page";
-import { isDemoPath } from "@/lib/demo-mode";
+import { isDemoPath, toDemoPath } from "@/lib/demo-mode";
 
 export default function AppointmentsPage() {
   const router = useRouter();
@@ -12,7 +12,7 @@ export default function AppointmentsPage() {
 
   useEffect(() => {
     if (searchParams.get("tab") !== "tasks") return;
-    const base = isDemoPath(pathname) ? "/dashboard/demo" : "/dashboard";
+    const base = isDemoPath(pathname) ? toDemoPath("/dashboard") : "/dashboard";
     router.replace(`${base}/tasks`);
   }, [pathname, router, searchParams]);
 

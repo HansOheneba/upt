@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useLayoutEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
@@ -24,7 +24,10 @@ import { useProfilePanel } from "@/components/dashboard/profile-panel-context";
 import { dashboardTheme } from "@/lib/dashboard-theme";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { AskCelereyAIButton } from "@/components/dashboard/ask-celerey-ai-button";
-import { fromDemoPath, isDemoMode } from "@/lib/demo-mode";
+import { fromDemoPath, isDemoMode, isPopulatedDashboardPath } from "@/lib/demo-mode";
+import { startPopulatedDemo } from "@/lib/pension/enter";
+import { financialStorageKey } from "@/lib/local-view";
+import { syncPensionGoalIntoFinancialStore } from "@/lib/pension/as-goal";
 import { isUptPensionDemoActive } from "@/lib/pension/session";
 import { usePensionStore } from "@/store/pensionStore";
 import { cn } from "@/lib/utils";
@@ -68,7 +71,7 @@ function SessionExpiredBanner() {
 
   useEffect(() => {
     function show() {
-      if (isDemoMode()) return;
+      if (isDemoMode() || isUptPensionDemoActive()) return;
       setVisible(true);
     }
     function handleRejection(event: PromiseRejectionEvent) {
@@ -142,10 +145,34 @@ export default function RootLayout({
   const pathname = usePathname();
   const onCopilot = fromDemoPath(pathname) === "/dashboard/ai";
 
+  useLayoutEffect(() => {
+    if (isPopulatedDashboardPath(window.location.pathname)) {
+      startPopulatedDemo();
+      return;
+    }
+    if (!isUptPensionDemoActive()) return;
+    usePensionStore.getState().hydrate();
+    // Restore this view before the pension goal is written. Otherwise the
+    // first paint is empty and that empty list replaces the saved goals.
+    try {
+      const raw = window.localStorage.getItem(financialStorageKey());
+      if (raw) {
+        const parsed = JSON.parse(raw) as { state?: Record<string, unknown> };
+        if (parsed?.state) useFinancialStore.setState(parsed.state as never);
+      }
+    } catch {
+      /* keep the current store */
+    }
+    syncPensionGoalIntoFinancialStore();
+  }, []);
+
   useEffect(() => {
     const active = isUptPensionDemoActive();
     setPensionDemo(active);
-    if (active) usePensionStore.getState().hydrate();
+    if (!active) return;
+    usePensionStore.getState().hydrate();
+    syncPensionGoalIntoFinancialStore();
+    return usePensionStore.subscribe(syncPensionGoalIntoFinancialStore);
   }, []);
 
   return (

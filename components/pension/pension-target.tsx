@@ -17,6 +17,31 @@ import { Progress } from "@/components/ui/progress";
 import { formatAmountTyping, finalizeAmountInput, formatGhs, parseAmountInput } from "@/lib/pension/metrics";
 import { usePensionStore } from "@/store/pensionStore";
 
+export function PensionTargetDialog({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const member = usePensionStore((state) => state.member);
+  const updateTargets = usePensionStore((state) => state.updateTargets);
+  if (!member) return null;
+
+  return (
+    <TargetDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      targetPot={member.targetPot > 0 ? member.targetPot : 0}
+      retirementAge={member.retirementAge > 0 ? member.retirementAge : 60}
+      onSave={(next) => {
+        updateTargets(next);
+        onOpenChange(false);
+      }}
+    />
+  );
+}
+
 export function PensionTarget({
   targetPot,
   retirementAge,

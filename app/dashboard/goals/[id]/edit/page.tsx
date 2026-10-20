@@ -49,6 +49,7 @@ import {
   type GoalCategory,
 } from "@/lib/client-data";
 import { useFinancialStore } from "@/store/financialStore";
+import { PENSION_GOAL_ID } from "@/lib/pension/as-goal";
 import { updateGoal as apiUpdateGoal, fetchGoals } from "@/lib/dashboard-api";
 import { toast } from "sonner";
 import { DateInput } from "@/components/ui/date-input";
@@ -179,6 +180,11 @@ export default function EditGoalPage() {
 
     async function load() {
       setIsLoading(true);
+
+      if (goalId === PENSION_GOAL_ID) {
+        router.replace("/dashboard/goals#pension");
+        return;
+      }
 
       // Try the Zustand store first (already loaded if coming from goals page)
       let goal: Goal | undefined = storeGoals.find((g) => g.id === goalId);

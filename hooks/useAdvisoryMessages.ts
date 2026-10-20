@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { isDemoMode } from "@/lib/demo-mode";
+import { useLocalSampleData } from "@/hooks/useLocalSampleData";
+import { usesLocalSampleData } from "@/lib/demo-mode";
 import {
   CONFLICT_COPY,
   fetchMessageThread,
@@ -12,6 +13,7 @@ import {
   type ThreadMessage,
 } from "@/lib/book-api";
 import { SessionExpiredError } from "@/lib/dashboard-api";
+import { isOfflineSession } from "@/lib/session-expired";
 import { MOCK_MESSAGES } from "@/lib/advisory-mock";
 
 export function useAdvisoryMessages(options: {
@@ -26,12 +28,10 @@ export function useAdvisoryMessages(options: {
   send: () => Promise<void>;
   reload: () => void;
 } {
-  const demoMode = isDemoMode();
+  const demoMode = useLocalSampleData();
   const { enabled, active } = options;
 
-  const [items, setItems] = useState<ThreadMessage[]>(
-    demoMode ? MOCK_MESSAGES : [],
-  );
+  const [items, setItems] = useState<ThreadMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [body, setBody] = useState("");
@@ -44,7 +44,7 @@ export function useAdvisoryMessages(options: {
   }, []);
 
   const load = useCallback(async () => {
-    if (!enabled || demoMode) return;
+    if (!enabled || demoMode || usesLocalSampleData() || isOfflineSession()) return;
     setLoading(true);
     try {
       const thread = await fetchMessageThread(1, 50);
@@ -63,12 +63,20 @@ export function useAdvisoryMessages(options: {
     }
   }, [enabled, demoMode]);
 
-  useEffect(() => {
-    if (!active || !enabled) return;
-    if (demoMode) {
+  useLayoutEffect(() => {
+    if (demoMode || usesLocalSampleData()) {
       setItems(MOCK_MESSAGES);
+      setLoading(false);
       return;
     }
+    if (isOfflineSession()) {
+      setItems([]);
+      setLoading(false);
+    }
+  }, [demoMode]);
+
+  useEffect(() => {
+    if (!active || !enabled || demoMode || usesLocalSampleData() || isOfflineSession()) return;
     if (loadedRef.current) return;
     void load();
   }, [active, enabled, demoMode, load, tick]);

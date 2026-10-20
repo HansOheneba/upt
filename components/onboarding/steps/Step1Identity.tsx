@@ -44,6 +44,7 @@ import {
 } from "@/lib/onboarding/schemas";
 import type { IdentityData } from "@/lib/onboarding/types";
 import { ONBOARDING_COPY } from "@/lib/onboarding/copy";
+import { isOfflineSession } from "@/lib/session-expired";
 import { useOnboardingStore } from "@/store/onboardingStore";
 import {
   ArrowRight,
@@ -348,6 +349,12 @@ export function Step1Identity({
 
   // ─── Auto-detect country + currency via IP ────────
   React.useEffect(() => {
+    if (isOfflineSession()) {
+      if (!defaultValues?.resident_country) setValue("resident_country", "Ghana");
+      if (!defaultValues?.currency) setValue("currency", "GHS");
+      if (!defaultValues?.phone_number) setDialCode("+233");
+      return;
+    }
     fetch("https://ipapi.co/json/")
       .then((res) => res.json())
       .then((data) => {

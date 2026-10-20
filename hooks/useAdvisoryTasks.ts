@@ -1,9 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { isDemoMode } from "@/lib/demo-mode";
+import { useCallback, useEffect, useLayoutEffect, useState } from "react";
+import { useLocalSampleData } from "@/hooks/useLocalSampleData";
+import { usesLocalSampleData } from "@/lib/demo-mode";
 import { fetchTasks, updateTaskStatus, type ClientTask } from "@/lib/book-api";
 import { SessionExpiredError } from "@/lib/dashboard-api";
+import { isOfflineSession } from "@/lib/session-expired";
 import { mapTasks } from "@/lib/advisory-map";
 import { MOCK_TASKS } from "@/lib/advisory-mock";
 import type { ActionItem } from "@/components/dashboard/advisor/types";
@@ -18,14 +20,12 @@ export function useAdvisoryTasks(options?: {
   toggleItem: (id: string) => Promise<void>;
   reload: () => void;
 } {
-  const demoMode = isDemoMode();
+  const demoMode = useLocalSampleData();
   const enabled = options?.enabled ?? true;
   const overviewFallback = options?.overviewFallback;
 
-  const [items, setItems] = useState<ActionItem[]>(
-    demoMode ? MOCK_TASKS : [],
-  );
-  const [loading, setLoading] = useState(() => !demoMode && enabled);
+  const [items, setItems] = useState<ActionItem[]>([]);
+  const [loading, setLoading] = useState(enabled);
   const [error, setError] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
 
@@ -33,14 +33,22 @@ export function useAdvisoryTasks(options?: {
     setTick((n) => n + 1);
   }, []);
 
-  useEffect(() => {
-    if (!enabled) return;
-    if (demoMode) {
+  useLayoutEffect(() => {
+    if (demoMode || usesLocalSampleData()) {
       setItems(MOCK_TASKS);
       setLoading(false);
       setError(null);
       return;
     }
+    if (isOfflineSession()) {
+      setItems([]);
+      setLoading(false);
+      setError(null);
+    }
+  }, [demoMode]);
+
+  useEffect(() => {
+    if (!enabled || demoMode || usesLocalSampleData() || isOfflineSession()) return;
 
     let cancelled = false;
     setLoading(true);

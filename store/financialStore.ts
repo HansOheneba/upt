@@ -1,6 +1,7 @@
 // store/financialStore.ts
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
+import { financialStorageKey } from "@/lib/local-view";
 
 import type {
   User,
@@ -928,7 +929,21 @@ export const useFinancialStore = create<FinancialState>()(
       },
     }),
     {
-      name: "financial-store-v1",
+      name: "financial-store-v2",
+      storage: createJSONStorage(() => ({
+        getItem: () => {
+          if (typeof window === "undefined") return null;
+          return window.localStorage.getItem(financialStorageKey());
+        },
+        setItem: (_name, value) => {
+          if (typeof window === "undefined") return;
+          window.localStorage.setItem(financialStorageKey(), value);
+        },
+        removeItem: () => {
+          if (typeof window === "undefined") return;
+          window.localStorage.removeItem(financialStorageKey());
+        },
+      })),
       /**
        * Defer localStorage hydration until after the first render so the
        * server-rendered HTML (which uses INITIAL_STATE) and the client's

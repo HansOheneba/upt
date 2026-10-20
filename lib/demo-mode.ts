@@ -4,6 +4,7 @@
  */
 
 import sampleData from "@/lib/sample-client-data.json";
+import { brand } from "@/lib/tenant";
 import { useFinancialStore, DEFAULT_LEGACY } from "@/store/financialStore";
 import { computeProfileCompletionScore } from "@/lib/profile-checklist";
 import {
@@ -15,11 +16,25 @@ import { markPageKeysFetched } from "@/hooks/usePageData";
 import type { ProfileStoreSnapshot } from "@/lib/profile-checklist";
 
 export const DEMO_BASE = "/dashboard/demo";
+/** Populated UPT dashboard. Every tab under this prefix is the filled account. */
+export const UPT_DEMO_BASE = "/demo/dashboard";
+
+function demoBase(): string {
+  return brand.id === "upt" ? UPT_DEMO_BASE : DEMO_BASE;
+}
 
 let _demoActive = false;
 
+export function isPopulatedDashboardPath(pathname: string): boolean {
+  return pathname === UPT_DEMO_BASE || pathname.startsWith(`${UPT_DEMO_BASE}/`);
+}
+
 export function isDemoPath(pathname: string): boolean {
-  return pathname === DEMO_BASE || pathname.startsWith(`${DEMO_BASE}/`);
+  return (
+    pathname === DEMO_BASE ||
+    pathname.startsWith(`${DEMO_BASE}/`) ||
+    isPopulatedDashboardPath(pathname)
+  );
 }
 
 export function markDemoModeActive(): void {
@@ -32,9 +47,26 @@ export function isDemoMode(): boolean {
   return isDemoPath(window.location.pathname);
 }
 
+/**
+ * Populated dashboard: the /demo/dashboard prefix, the legacy demo path,
+ * or the saved demo view. The empty customer account is not included.
+ */
+export function usesLocalSampleData(): boolean {
+  if (isDemoMode()) return true;
+  if (typeof window === "undefined") return false;
+  try {
+    return window.localStorage.getItem("upt_local_view") === "demo";
+  } catch {
+    return false;
+  }
+}
+
 /** Map a demo dashboard path back to its real equivalent. */
 export function fromDemoPath(path: string): string {
-  if (path === DEMO_BASE) return "/dashboard";
+  if (path === UPT_DEMO_BASE || path === DEMO_BASE) return "/dashboard";
+  if (path.startsWith(`${UPT_DEMO_BASE}/`)) {
+    return path.replace(UPT_DEMO_BASE, "/dashboard");
+  }
   if (path.startsWith(`${DEMO_BASE}/`)) {
     return path.replace(DEMO_BASE, "/dashboard");
   }
@@ -43,9 +75,10 @@ export function fromDemoPath(path: string): string {
 
 /** Map a real dashboard path to its demo equivalent. */
 export function toDemoPath(path: string): string {
-  if (path === "/dashboard") return DEMO_BASE;
+  const base = demoBase();
+  if (path === "/dashboard") return base;
   if (path.startsWith("/dashboard/")) {
-    return path.replace("/dashboard", DEMO_BASE);
+    return path.replace("/dashboard", base);
   }
   return path;
 }

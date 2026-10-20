@@ -12,7 +12,8 @@ import { useAdvisoryTasks } from "@/hooks/useAdvisoryTasks";
 import { useAdvisoryMessages } from "@/hooks/useAdvisoryMessages";
 import { canAccessFeature, formatCurrency } from "@/lib/client-data";
 import { useFinancialStore } from "@/store/financialStore";
-import { isDemoMode, isDemoPath } from "@/lib/demo-mode";
+import { isDemoPath, toDemoPath } from "@/lib/demo-mode";
+import { useLocalSampleData } from "@/hooks/useLocalSampleData";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { dashboardTheme } from "@/lib/dashboard-theme";
@@ -181,12 +182,12 @@ export function AdvisorySectionPage({ section }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const { ready, auth, sub } = useClientGate();
-  const demoMode = isDemoMode();
+  const demoMode = useLocalSampleData();
   const currency = useFinancialStore((s) => s.user?.currency ?? "USD");
   const { loading, noAdvisor, overview, error, reload } = useAdvisoryOverview();
 
   const messagesHref = isDemoPath(pathname)
-    ? "/dashboard/demo/messages"
+    ? toDemoPath("/dashboard/messages")
     : "/dashboard/messages";
 
   const isTrial =
@@ -446,7 +447,7 @@ export function AdvisorySectionPage({ section }: Props) {
 
   async function handleDownload(id: string) {
     if (demoMode) {
-      toast("Demo files can't be downloaded.");
+      toast("This file isn't available to download.");
       return;
     }
     try {

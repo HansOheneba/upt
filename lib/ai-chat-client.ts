@@ -1,4 +1,8 @@
-import type { FinancialSnapshot } from "@/lib/celerey-ai-local";
+import {
+  generateLocalAiResponse,
+  type FinancialSnapshot,
+} from "@/lib/celerey-ai-local";
+import { isOfflineSession } from "@/lib/session-expired";
 import { brand } from "@/lib/tenant";
 
 export type AiChatTurn = {
@@ -17,6 +21,13 @@ export async function streamAiChatReply(params: {
   signal?: AbortSignal;
   onDelta: (text: string) => void;
 }): Promise<string> {
+  if (params.isDemo || isOfflineSession()) {
+    const last = params.messages[params.messages.length - 1]?.content ?? "";
+    const reply = generateLocalAiResponse(last, params.snapshot);
+    params.onDelta(reply);
+    return reply;
+  }
+
   const response = await fetch("/api/ai/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

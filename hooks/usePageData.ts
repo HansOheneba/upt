@@ -32,7 +32,8 @@ import {
   applySubscriptionFromApiUser,
   mergeUserWithRiskAssessment,
 } from "@/lib/map-api-user";
-import { isDemoMode } from "@/lib/demo-mode";
+import { usesLocalSampleData } from "@/lib/demo-mode";
+import { isOfflineSession } from "@/lib/session-expired";
 
 export type PageDataKey =
   | "goals"
@@ -89,7 +90,7 @@ export function usePageData(key: PageDataKey) {
     if (mounted.current) return;
     mounted.current = true;
 
-    if (isDemoMode()) {
+    if (usesLocalSampleData() || isOfflineSession()) {
       setLoading(false);
       _lastFetched.set(key, Date.now());
       return;

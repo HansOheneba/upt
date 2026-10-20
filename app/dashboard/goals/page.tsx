@@ -28,6 +28,8 @@ import {
 } from "@/components/dashboard/goals/utils";
 import { dashboardTheme } from "@/lib/dashboard-theme";
 import { DashboardEmptyState } from "@/components/dashboard/empty-state";
+import { PensionTargetDialog } from "@/components/pension/pension-target";
+import { PENSION_GOAL_ID, withPensionGoalFirst } from "@/lib/pension/as-goal";
 import { Target } from "lucide-react";
 import { useTourDemoData } from "@/hooks/useTourDemo";
 import { TOUR_DEMO_GOALS } from "@/lib/tour-demo-data";
@@ -90,13 +92,33 @@ export default function GoalsDashboard() {
     router.push("/dashboard/goals/new");
   };
 
+  const [pensionTargetOpen, setPensionTargetOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    if (window.location.hash !== "#pension") return;
+    setPensionTargetOpen(true);
+    window.history.replaceState(
+      null,
+      "",
+      window.location.pathname + window.location.search,
+    );
+  }, []);
+
   const goToGoal = (goalId: string, hash?: string): void => {
+    if (goalId === PENSION_GOAL_ID) {
+      setPensionTargetOpen(true);
+      return;
+    }
     router.push(
       `/dashboard/goals/${goalId}/edit${hash ? `#${hash}` : ""}`,
     );
   };
 
   const requestDelete = (goal: EnrichedGoal): void => {
+    if (goal.id === PENSION_GOAL_ID) {
+      toast("Your pension target stays as a goal. Edit it to change the amount or retirement age.");
+      return;
+    }
     setPendingDelete(goal);
     setDeleteOpen(true);
   };
@@ -120,11 +142,15 @@ export default function GoalsDashboard() {
   };
 
   const handlePrioritySave = (reordered: Goal[]) => {
-    setGoals(reordered);
-    const store = useFinancialStore.getState();
-    reordered.forEach((g) => store.updateGoal(g));
+    const pension =
+      reordered.find((goal) => goal.id === PENSION_GOAL_ID) ??
+      goals.find((goal) => goal.id === PENSION_GOAL_ID) ??
+      null;
+    const next = pension ? withPensionGoalFirst(reordered, pension) : reordered;
+    setGoals(next);
+    useFinancialStore.getState().setGoals(next);
     reorderGoalPriorities(
-      reordered.map((g) => ({ goal_id: g.id, priority: g.priority })),
+      next.map((g) => ({ goal_id: g.id, priority: g.priority })),
     )
       .then(() => toast.success("Priorities saved."))
       .catch(() => toast.error("Failed to save priorities. Please try again."));
@@ -205,6 +231,11 @@ export default function GoalsDashboard() {
           </div>
         )}
       </div>
+
+      <PensionTargetDialog
+        open={pensionTargetOpen}
+        onOpenChange={setPensionTargetOpen}
+      />
 
       {/* Priority Dialog */}
       <PriorityDialog

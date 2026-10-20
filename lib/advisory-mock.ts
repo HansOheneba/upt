@@ -46,7 +46,7 @@ export const MOCK_LAST_SESSION: AdvisorySession = {
   keyDiscussionPoints: [
     "Assets up 6.8% for the year.",
     "Emergency fund hit six months. Took longer than we planned.",
-    "Bill bumped pension contributions after the pay rise.",
+    "Akosua bumped pension contributions after the pay rise.",
     "We ran numbers on overpaying the Stratford mortgage.",
   ],
   advisorAssessment:
@@ -126,7 +126,7 @@ export const MOCK_HISTORY: AdvisorySession[] = [
     keyDiscussionPoints: [
       "Surplus was 12% above what we'd budgeted.",
       "No income protection policy yet. That worried me more than the debt.",
-      "Bill asked about buying another rental. I told him to fix insurance first.",
+      "Akosua asked about buying another rental. I told her to fix insurance first.",
     ],
     advisorAssessment:
       "Solid six months, but the income protection gap was the real problem. Everything else could wait.",

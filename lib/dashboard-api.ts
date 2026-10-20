@@ -31,6 +31,7 @@ import { useFinancialStore } from "@/store/financialStore";
 import { type GoalsMeta, EMPTY_GOALS_META } from "@/lib/goals-meta";
 import {
   isDemoDashboardPath,
+  isOfflineSession,
   notifySessionExpired,
 } from "@/lib/session-expired";
 
@@ -143,11 +144,12 @@ export async function proxyCall<T = unknown>(
   method: "GET" | "POST" | "PUT" | "DELETE" = "GET",
   body?: unknown,
 ): Promise<T> {
-  // Demo uses local sample data and has no session. Do not hit /api/proxy:
-  // a 401 both fails the action (toasts like "Failed to save priorities")
-  // and opens the session-expired modal.
-  if (isDemoDashboardPath()) {
-    return {} as T;
+  // Local sessions have no API. Do not hit /api/proxy: a 401 fails the
+  // action and opens the session-expired modal.
+  if (isDemoDashboardPath() || isOfflineSession()) {
+    const payload =
+      body && typeof body === "object" ? body : method === "GET" ? [] : {};
+    return { success: true, data: payload } as T;
   }
 
   let { res, data } = await attemptProxyCall<T>(path, method, body);
@@ -182,8 +184,8 @@ async function attemptProxyUpload<T = unknown>(
 }
 
 export async function proxyUpload<T = unknown>(form: FormData): Promise<T> {
-  if (isDemoDashboardPath()) {
-    return {} as T;
+  if (isDemoDashboardPath() || isOfflineSession()) {
+    return { success: true, data: {} } as T;
   }
 
   let { res, data } = await attemptProxyUpload<T>(form);
@@ -1558,7 +1560,7 @@ function unwrapRiskAssessmentPayload(
 }
 
 export async function fetchRiskQuestions(): Promise<RiskQuestion[]> {
-  if (isDemoDashboardPath()) {
+  if (isDemoDashboardPath() || isOfflineSession()) {
     return DEMO_RISK_QUESTIONS;
   }
 
@@ -1590,7 +1592,7 @@ export async function submitRiskAssessment(payload: {
   questionnaire_version: string;
   responses: Record<string, number>;
 }): Promise<RiskAssessmentResult | null> {
-  if (isDemoDashboardPath()) {
+  if (isDemoDashboardPath() || isOfflineSession()) {
     const user = useFinancialStore.getState().user;
     return buildDemoRiskAssessmentResult(payload.responses, user);
   }
@@ -1615,7 +1617,7 @@ export async function submitRiskAssessment(payload: {
 }
 
 export async function fetchLatestRiskAssessment(): Promise<RiskAssessmentResult | null> {
-  if (isDemoDashboardPath()) {
+  if (isDemoDashboardPath() || isOfflineSession()) {
     return useFinancialStore.getState().riskAssessment;
   }
 

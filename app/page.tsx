@@ -27,7 +27,7 @@ import {
 } from "../lib/dashboard-api";
 import { sanitizeAuthApiMessage } from "../lib/auth-api-errors";
 import { brand } from "../lib/tenant";
-import { startPensionJoin } from "@/lib/pension/enter";
+import { startPensionJoin, startPensionSignIn } from "@/lib/pension/enter";
 
 const OTP_MESSAGE_TYPE = "OTPAuthMessage:HTML";
 
@@ -125,6 +125,14 @@ export default function Home() {
     setErrorMessage(null);
     setInfoMessage(null);
     setEmail(submittedEmail);
+
+    if (brand.id === "upt" && mode === "login") {
+      startPensionSignIn(submittedEmail);
+      setIsNavigating(true);
+      router.push("/dashboard");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -448,7 +456,15 @@ export default function Home() {
                     />
                   )}
 
-                  <div className="mt-8">
+                  <div className="mt-8 flex flex-col items-start gap-2">
+                    {brand.id === "upt" && step === "email" ? (
+                      <Link
+                        href="/demo"
+                        className="inline-flex min-h-11 items-center text-sm font-medium text-foreground underline underline-offset-4 hover:text-foreground/80 focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      >
+                        View a member account
+                      </Link>
+                    ) : null}
                     <Link
                       href="/support"
                       className="inline-flex min-h-11 items-center text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"

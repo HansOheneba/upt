@@ -32,7 +32,9 @@ import {
   type Weekday,
 } from "@/lib/book-api";
 import { SessionExpiredError } from "@/lib/dashboard-api";
-import { isDemoMode } from "@/lib/demo-mode";
+import { isOfflineSession } from "@/lib/session-expired";
+import { useLocalSampleData } from "@/hooks/useLocalSampleData";
+import { usesLocalSampleData } from "@/lib/demo-mode";
 
 const PRIMARY = "var(--brand-primary)";
 
@@ -99,17 +101,24 @@ type Props = {
 };
 
 export function ClientAvailabilityCard({ enabled, demoValue }: Props) {
-  const demo = isDemoMode();
+  const demo = useLocalSampleData();
   const [value, setValue] = React.useState<ClientAvailability>(
-    demo ? (demoValue ?? DEFAULT_AVAILABILITY) : DEFAULT_AVAILABILITY,
+    DEFAULT_AVAILABILITY,
   );
   const [draft, setDraft] = React.useState<ClientAvailability>(value);
   const [loading, setLoading] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
   const [editOpen, setEditOpen] = React.useState(false);
 
+  React.useLayoutEffect(() => {
+    if (!demo) return;
+    const next = demoValue ?? DEFAULT_AVAILABILITY;
+    setValue(next);
+    setDraft(next);
+  }, [demo, demoValue]);
+
   React.useEffect(() => {
-    if (!enabled || demo) return;
+    if (!enabled || demo || usesLocalSampleData() || isOfflineSession()) return;
     let cancelled = false;
     setLoading(true);
     fetchAvailability()

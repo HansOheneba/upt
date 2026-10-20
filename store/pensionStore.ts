@@ -1,12 +1,13 @@
 "use client";
 
 import { create } from "zustand";
+import { pensionStorageKey } from "@/lib/local-view";
 import {
   DEMO_MEMBER,
   PREVIEW_REQUESTS,
   PREVIEW_WITHDRAWALS,
   PREVIEW_CONTRIBUTIONS,
-  contributionsForMember,
+  emptyMember,
   type JoinInput,
   memberFromJoin,
 } from "@/lib/pension/demo-data";
@@ -16,8 +17,6 @@ import type {
   Withdrawal,
 } from "@/lib/pension/types";
 import { WITHDRAWAL_LOAD_ERROR } from "@/lib/pension/withdrawals";
-
-const STORAGE_KEY = "upt_pension_state_v1";
 
 const EMPTY: PensionSnapshot = {
   member: null,
@@ -30,7 +29,7 @@ function readSnapshot(): { snapshot: PensionSnapshot; error: string | null } {
   if (typeof window === "undefined") return { snapshot: EMPTY, error: null };
   let raw: string | null;
   try {
-    raw = window.localStorage.getItem(STORAGE_KEY);
+    raw = window.localStorage.getItem(pensionStorageKey());
   } catch {
     return { snapshot: EMPTY, error: WITHDRAWAL_LOAD_ERROR };
   }
@@ -57,21 +56,13 @@ function readSnapshot(): { snapshot: PensionSnapshot; error: string | null } {
   }
 }
 
-function writeSnapshot(snapshot: PensionSnapshot): void {
-  if (typeof window === "undefined") return;
+function writeSnapshot(snapshot: PensionSnapshot): boolean {
+  if (typeof window === "undefined") return false;
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
+    window.localStorage.setItem(pensionStorageKey(), JSON.stringify(snapshot));
+    return true;
   } catch {
-    /* noop */
-  }
-}
-
-function clearSnapshot(): void {
-  if (typeof window === "undefined") return;
-  try {
-    window.localStorage.removeItem(STORAGE_KEY);
-  } catch {
-    /* noop */
+    return false;
   }
 }
 
@@ -83,10 +74,12 @@ type PensionStore = PensionSnapshot & {
   hydrate: () => void;
   reload: () => void;
   loadPreview: () => void;
+  loadEmpty: (email: string) => void;
   loadJoined: (input: JoinInput) => void;
+  /** Drops the in-memory snapshot. The saved local view stays on disk. */
   clear: () => void;
   addWithdrawal: (input: NewWithdrawal) => void;
-  addRequest: (input: { subject: string; body: string }) => void;
+  addRequest: (input: { subject: string; body: string }) => boolean;
   updateTargets: (input: { targetPot: number; retirementAge: number }) => void;
 };
 
@@ -123,18 +116,26 @@ export const usePensionStore = create<PensionStore>((set, get) => ({
     });
   },
 
+  loadEmpty: (email) => {
+    commit(set, {
+      member: emptyMember(email),
+      contributions: [],
+      withdrawals: [],
+      requests: [],
+    });
+  },
+
   loadJoined: (input) => {
     const member = memberFromJoin(input);
     commit(set, {
       member,
-      contributions: contributionsForMember(member),
+      contributions: [],
       withdrawals: [],
       requests: [],
     });
   },
 
   clear: () => {
-    clearSnapshot();
     set({ ...EMPTY, hydrated: true, loadError: null });
   },
 
@@ -180,6 +181,8 @@ export const usePensionStore = create<PensionStore>((set, get) => ({
       withdrawals: get().withdrawals,
       requests: [request, ...get().requests],
     };
-    commit(set, next);
+    if (!writeSnapshot(next)) return false;
+    set({ ...next, hydrated: true, loadError: null });
+    return true;
   },
 }));

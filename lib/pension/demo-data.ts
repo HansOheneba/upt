@@ -162,14 +162,39 @@ export type JoinInput = {
   retirementAge: number;
 };
 
+/** A signed-in account with no contributions, withdrawals, or requests yet. */
+export function emptyMember(email: string): PensionMember {
+  const today = new Date().toISOString().slice(0, 10);
+  const slug = email.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 12);
+  return {
+    id: `mop-${slug || "new"}`,
+    firstName: "",
+    lastName: "",
+    email: email.trim(),
+    mobile: "",
+    profession: "",
+    location: "",
+    dateOfBirth: "",
+    nextOfKin: "",
+    nextOfKinContact: "",
+    scheme: "My Own Pension",
+    channel: "mtn_momo",
+    monthlyContribution: 0,
+    retirementAge: 60,
+    targetPot: 0,
+    unitPrice: UNIT_PRICE,
+    unitPriceDate: UNIT_PRICE_DATE,
+    memberSince: today,
+  };
+}
+
 export function memberFromJoin(input: JoinInput): PensionMember {
   const first = input.firstName.trim();
   const last = input.lastName.trim();
   const slug = `${first}.${last}`.toLowerCase().replace(/[^a-z.]+/g, "");
-  const contributions = buildRecentContributions(input.monthlyContribution, 12);
-  const unitPrice = contributions[contributions.length - 1]?.unitPrice ?? UNIT_PRICE;
+  const today = new Date().toISOString().slice(0, 10);
   return {
-    id: `mop-${input.mobile.replace(/\D/g, "").slice(-6)}`,
+    id: `mop-${input.mobile.replace(/\D/g, "").slice(-6) || "new"}`,
     firstName: first,
     lastName: last,
     email: `${slug || "member"}@example.com`,
@@ -184,13 +209,8 @@ export function memberFromJoin(input: JoinInput): PensionMember {
     monthlyContribution: input.monthlyContribution,
     retirementAge: input.retirementAge,
     targetPot: input.targetPot,
-    unitPrice,
+    unitPrice: UNIT_PRICE,
     unitPriceDate: UNIT_PRICE_DATE,
-    memberSince: contributions[0]?.date ?? UNIT_PRICE_DATE,
+    memberSince: today,
   };
-}
-
-export function contributionsForMember(member: PensionMember): Contribution[] {
-  if (member.id === DEMO_MEMBER.id) return PREVIEW_CONTRIBUTIONS;
-  return buildRecentContributions(member.monthlyContribution, 12);
 }

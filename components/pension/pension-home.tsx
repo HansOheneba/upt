@@ -122,7 +122,7 @@ export function PensionHome() {
   return (
     <PensionPage>
       <PensionPageHeader
-        title={memberName(member)}
+          title={memberName(member) || "Your pension"}
         description={`${member.scheme} · Member since ${formatPensionDate(member.memberSince)} · ${member.id.toUpperCase()}`}
         action={
           <Button asChild>

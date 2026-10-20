@@ -113,6 +113,7 @@ import {
 import { DateInput } from "@/components/ui/date-input";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { usePageData } from "@/hooks/usePageData";
+import { isOfflineSession } from "@/lib/session-expired";
 import { useInvestmentCurrency, useUserCurrency, useWealthFormatting } from "@/hooks/useUserCurrency";
 import { CurrencyDisplayToggle } from "@/components/dashboard/currency-display-context";
 import { useTourDemoData } from "@/hooks/useTourDemo";
@@ -255,6 +256,7 @@ function useLivePrices(holdings: AssetHolding[]) {
 
   const fetchPrices = React.useCallback(
     async (forceRefresh = false) => {
+      if (isOfflineSession()) return;
       // Check cache first unless forcing refresh
       if (!forceRefresh) {
         const cached = readPriceCache();

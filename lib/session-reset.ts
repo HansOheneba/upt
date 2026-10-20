@@ -7,6 +7,7 @@
 // previous user's data hydrated in memory and the new user starts mid-flow.
 
 import { clearAllUserData } from "@/lib/client-data";
+import { brand } from "@/lib/tenant";
 import {
   useFinancialStore,
   FINANCIAL_STORE_INITIAL_STATE,
@@ -21,10 +22,14 @@ export function resetSession(): void {
   } catch {
     /* noop */
   }
-  try {
-    useFinancialStore.persist.clearStorage();
-  } catch {
-    /* noop */
+  // UPT keeps the demo view and the customer view in localStorage.
+  // Signing out only clears the in-memory copy so the next open restores it.
+  if (brand.id !== "upt") {
+    try {
+      useFinancialStore.persist.clearStorage();
+    } catch {
+      /* noop */
+    }
   }
 
   // 2. Reset in-memory store state so currently-mounted components re-render

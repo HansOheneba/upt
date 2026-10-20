@@ -11,14 +11,16 @@ export default function Breadcrumbs() {
 
   const segments = React.useMemo(() => {
     const parts = pathname.split("/").filter(Boolean);
-    return parts.map((part, index) => {
-      const href = "/" + parts.slice(0, index + 1).join("/");
+    const skip = parts[0] === "demo" ? 1 : 0;
+    const visible = parts.slice(skip);
+    return visible.map((part, index) => {
+      const href = "/" + parts.slice(0, skip + index + 1).join("/");
       // Format the label: capitalize and replace hyphens with spaces
       const label =
         brand.id === "upt" && part === "dashboard"
           ? "Overview"
           : part.charAt(0).toUpperCase() + part.slice(1).replace(/-/g, " ");
-      const isLast = index === parts.length - 1;
+      const isLast = index === visible.length - 1;
       return { href, label, isLast };
     });
   }, [pathname]);

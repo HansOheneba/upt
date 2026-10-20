@@ -138,7 +138,9 @@ export function EmailForm({
           ) : (
             <p id="email-help" className="text-sm text-muted-foreground">
               {mode === "login"
-                ? "We’ll email you a 6-digit code to confirm it’s you."
+                ? brand.id === "upt"
+                  ? "Enter the email on your pension account."
+                  : "We’ll email you a 6-digit code to confirm it’s you."
                 : "Use the email address you want on this account."}
             </p>
           )}
