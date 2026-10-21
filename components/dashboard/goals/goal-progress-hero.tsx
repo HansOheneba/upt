@@ -18,8 +18,8 @@ export function GoalProgressHero({
       <section className={dashboardTheme.elevatedSection} aria-busy="true">
         <Skeleton className="h-3 w-32" />
         <Skeleton className="mt-3 h-4 w-72 max-w-full" />
-        <div className="mt-6 grid grid-cols-2 gap-6 sm:grid-cols-3">
-          <Skeleton className="col-span-2 h-12 w-40 sm:col-span-1" />
+        <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
+          <Skeleton className="h-12 w-40 sm:col-span-2 lg:col-span-1" />
           <Skeleton className="h-10 w-28" />
           <Skeleton className="h-10 w-20" />
         </div>
@@ -34,8 +34,8 @@ export function GoalProgressHero({
         {message}
       </p>
 
-      <div className="mt-4 grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-3">
-        <div className="col-span-2 sm:col-span-1">
+      <div className="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-x-6 lg:grid-cols-3">
+        <div className="sm:col-span-2 lg:col-span-1">
           <p className="text-2xl font-medium tracking-tight tabular-nums">
             {formatCurrency(stats.saved)}
           </p>
@@ -43,7 +43,7 @@ export function GoalProgressHero({
             Saved toward goals
           </p>
         </div>
-        <div>
+        <div className="min-w-0">
           <p className="text-xl font-medium tracking-tight tabular-nums">
             {formatCurrency(Math.round(stats.monthly))}
             <span className="text-base font-normal text-muted-foreground">
@@ -54,7 +54,7 @@ export function GoalProgressHero({
             Monthly commitment
           </p>
         </div>
-        <div>
+        <div className="min-w-0">
           <p className="text-xl font-medium tracking-tight tabular-nums">
             {stats.onTrack}
             <span className="text-base font-normal text-muted-foreground">

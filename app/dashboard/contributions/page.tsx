@@ -169,7 +169,7 @@ export default function ContributionsPage() {
                 Date, source, amount, unit price, and units for each contribution.
               </CardDescription>
               <CardAction>
-                <div className="flex flex-wrap justify-end gap-2">
+                <div className="grid w-full gap-2 sm:flex sm:w-auto sm:flex-wrap sm:justify-end">
                   {memberships.length > 1 ? (
                     <Select
                       value={selected ? selected.id : "all"}
@@ -179,7 +179,7 @@ export default function ContributionsPage() {
                         setPage(0);
                       }}
                     >
-                      <SelectTrigger size="sm" aria-label="Filter contributions by scheme">
+                      <SelectTrigger size="sm" aria-label="Filter contributions by scheme" className="w-full min-w-0 sm:w-52">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -200,7 +200,7 @@ export default function ContributionsPage() {
                         setPage(0);
                       }}
                     >
-                      <SelectTrigger size="sm" aria-label="Filter contributions by year">
+                      <SelectTrigger size="sm" aria-label="Filter contributions by year" className="w-full min-w-0 sm:w-36">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -368,7 +368,32 @@ function ContributionTable({
   schemeNames: Map<string, string> | null;
 }) {
   return (
-    <div className="overflow-x-auto">
+    <>
+      <ul className="divide-y divide-foreground/5 lg:hidden">
+        {rows.map((row) => (
+          <li key={row.id} className="py-3 first:pt-0 last:pb-0">
+            <div className="flex items-start justify-between gap-3">
+              <p className="text-sm font-medium">
+                <time dateTime={row.date.slice(0, 10)}>{formatPensionDate(row.date)}</time>
+              </p>
+              <p className="shrink-0 text-sm font-medium tabular-nums">
+                {Number.isFinite(row.amount) ? formatGhs(row.amount, 2) : "Unavailable"}
+              </p>
+            </div>
+            {schemeNames ? (
+              <p className="mt-1 text-sm">{schemeNames.get(row.membershipId) ?? "Scheme"}</p>
+            ) : null}
+            <p className="mt-1 text-xs leading-5 text-muted-foreground">
+              {contributionSourceLabel(row.channel)}
+              {" · "}
+              {Number.isFinite(row.unitPrice) ? formatGhs(row.unitPrice, 4) : "Unit price unavailable"}
+              {" · "}
+              {Number.isFinite(row.units) ? `${formatUnits(row.units)} units` : "Units unavailable"}
+            </p>
+          </li>
+        ))}
+      </ul>
+      <div className="hidden overflow-x-auto lg:block">
       <table className="w-full min-w-[36rem] text-sm">
         <caption className="sr-only">Confirmed pension contributions, newest first</caption>
         <thead>
@@ -418,7 +443,8 @@ function ContributionTable({
           ))}
         </tbody>
       </table>
-    </div>
+      </div>
+    </>
   );
 }
 

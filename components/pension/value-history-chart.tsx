@@ -95,7 +95,7 @@ export function ValueHistoryChart({
         <CardDescription>{description}</CardDescription>
         <CardAction>
           <Select value={range} onValueChange={(value) => setRange(value as ValueChartRange)}>
-            <SelectTrigger size="sm" aria-label="Value history range" className="w-[8.5rem]">
+            <SelectTrigger size="sm" aria-label="Value history range" className="w-full min-w-0 @sm/card-header:w-[8.5rem]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent align="end">
@@ -142,20 +142,9 @@ export function ValueHistoryChart({
                 <YAxis
                   tickLine={false}
                   axisLine={false}
-                  width={52}
+                  width={36}
                   tickFormatter={compactAxis}
                   domain={[0, (max: number) => (max > 0 ? max : 1)]}
-                  label={{
-                    value: "Value",
-                    angle: -90,
-                    position: "insideLeft",
-                    offset: 8,
-                    style: {
-                      fill: "var(--muted-foreground)",
-                      fontSize: 11,
-                      textAnchor: "middle",
-                    },
-                  }}
                 />
                 <ChartTooltip
                   cursor={false}

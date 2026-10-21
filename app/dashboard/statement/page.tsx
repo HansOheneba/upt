@@ -623,11 +623,11 @@ function StatementDocument({
   return (
     <article
       id="pension-statement"
-      className="rounded-xl bg-white p-6 text-black ring-1 ring-foreground/10 sm:p-8 print:ring-0"
+      className="rounded-xl bg-white p-4 text-black ring-1 ring-foreground/10 sm:p-8 print:p-0 print:ring-0"
     >
       <header className="flex flex-col gap-1 border-b border-black/10 pb-4">
         <p className="text-sm text-neutral-600">United Pension Trustees</p>
-        <h1 className="text-2xl font-semibold">
+        <h1 className="text-xl font-semibold break-words sm:text-2xl">
           {single ? `${single.membership.schemeName} statement` : "Account statement"}
         </h1>
         <p className="text-sm text-neutral-600">{periodLabel}</p>
@@ -717,31 +717,59 @@ function SchemeBlock({
             {bounded ? "No contributions in this period." : "No contributions recorded for this scheme."}
           </p>
         ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-black/10 text-left text-neutral-600">
-                <th className="py-2 pr-3 font-medium">Date</th>
-                <th className="py-2 pr-3 font-medium">Amount</th>
-                <th className="py-2 font-medium">Units</th>
-              </tr>
-            </thead>
-            <tbody>
+          <>
+            <ul className="divide-y divide-black/10 sm:hidden print:hidden">
               {rows.map((row) => (
-                <tr key={row.id} className="border-b border-black/5">
-                  <td className="py-2 pr-3">{formatPensionDate(row.date)}</td>
-                  <td className="py-2 pr-3 tabular-nums">{formatGhs(row.amount, 2)}</td>
-                  <td className="py-2 tabular-nums">{formatUnits(row.units)}</td>
-                </tr>
+                <li key={row.id} className="flex items-start justify-between gap-3 py-2 text-sm">
+                  <div className="min-w-0">
+                    <p>{formatPensionDate(row.date)}</p>
+                    <p className="text-neutral-600">{formatUnits(row.units)} units</p>
+                  </div>
+                  <p className="shrink-0 tabular-nums">{formatGhs(row.amount, 2)}</p>
+                </li>
               ))}
-            </tbody>
-          </table>
+            </ul>
+            <table className="hidden w-full text-sm sm:table print:table!">
+              <thead>
+                <tr className="border-b border-black/10 text-left text-neutral-600">
+                  <th className="py-2 pr-3 font-medium">Date</th>
+                  <th className="py-2 pr-3 font-medium">Amount</th>
+                  <th className="py-2 font-medium">Units</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((row) => (
+                  <tr key={row.id} className="border-b border-black/5">
+                    <td className="py-2 pr-3">{formatPensionDate(row.date)}</td>
+                    <td className="py-2 pr-3 tabular-nums">{formatGhs(row.amount, 2)}</td>
+                    <td className="py-2 tabular-nums">{formatUnits(row.units)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
         )}
       </div>
 
       {section.withdrawals.length > 0 ? (
         <div className="mt-5">
           <h3 className="text-sm font-medium">Withdrawals</h3>
-          <table className="mt-3 w-full text-sm">
+          <ul className="mt-3 divide-y divide-black/10 text-sm sm:hidden print:hidden">
+            {section.withdrawals.map((row) => (
+              <li key={row.id} className="py-2">
+                <div className="flex items-start justify-between gap-3">
+                  <p className="min-w-0">{row.reason}</p>
+                  <p className="shrink-0 tabular-nums">{formatGhs(row.amount, 2)}</p>
+                </div>
+                <p className="text-neutral-600">
+                  {formatPensionDate(row.submittedAt)}
+                  {" · "}
+                  {isWithdrawalStatus(row.status) ? WITHDRAWAL_BADGE_LABEL[row.status] : row.status}
+                </p>
+              </li>
+            ))}
+          </ul>
+          <table className="mt-3 hidden w-full text-sm sm:table print:table!">
             <thead>
               <tr className="border-b border-black/10 text-left text-neutral-600">
                 <th className="py-2 pr-3 font-medium">Date</th>

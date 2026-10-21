@@ -471,7 +471,7 @@ export function WithdrawalForm({
         ) : null}
         <div className="space-y-2">
           <Label id="wd-pay-label">Pay to</Label>
-          <div role="radiogroup" aria-labelledby="wd-pay-label" className="grid grid-cols-2 gap-2">
+          <div role="radiogroup" aria-labelledby="wd-pay-label" className="grid gap-2 sm:grid-cols-2">
             <Button
               type="button"
               role="radio"

@@ -128,7 +128,7 @@ export default function DashboardTopbar() {
               align="end"
               sideOffset={4}
               className={[
-                "z-50 w-80 overflow-hidden rounded-xl border bg-white p-0 text-popover-foreground shadow-md outline-none",
+                "z-50 w-[min(20rem,calc(100vw-1.5rem))] overflow-hidden rounded-xl border bg-white p-0 text-popover-foreground shadow-md outline-none",
                 notifOpen
                   ? "animate-fade-down animate-duration-200 animate-ease-out"
                   : notifEverOpened

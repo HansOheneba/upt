@@ -65,7 +65,7 @@ export function PortfolioAllocation({
                 style={swatchStyle(index)}
               />
               <span className="min-w-0 flex-1 truncate">{slice.membership.schemeName}</span>
-              <span className="shrink-0 tabular-nums text-muted-foreground">
+              <span className="shrink-0 text-right text-xs tabular-nums text-muted-foreground sm:text-sm">
                 {formatGhs(slice.value, 2)} · {formatShare(slice.percent)}
               </span>
             </Link>

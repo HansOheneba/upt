@@ -197,7 +197,25 @@ export default function SchemeDetailPage() {
               }}
             />
           ) : (
-            <div className="overflow-x-auto">
+            <>
+            <ul className="divide-y divide-foreground/5 lg:hidden">
+              {transactions.slice(0, 12).map((row) => (
+                <li key={row.id} className="py-3 first:pt-0 last:pb-0">
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="min-w-0 text-sm font-medium">{row.label}</p>
+                    <p className="shrink-0 text-sm tabular-nums">
+                      {Number.isFinite(row.amount) ? formatGhs(row.amount, 2) : "Unavailable"}
+                    </p>
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {row.at ? formatPensionDate(row.at) : "Date unavailable"}
+                    {" · "}
+                    {row.status}
+                  </p>
+                </li>
+              ))}
+            </ul>
+            <div className="hidden overflow-x-auto lg:block">
               <table className="w-full min-w-[32rem] text-sm">
                 <caption className="sr-only">Transactions for {membership.schemeName}</caption>
                 <thead>
@@ -224,6 +242,7 @@ export default function SchemeDetailPage() {
                 </tbody>
               </table>
             </div>
+            </>
           )}
           {schemeContributions.length > 0 ? (
             <Button type="button" variant="outline" asChild className="mt-4">
@@ -268,7 +287,7 @@ export default function SchemeDetailPage() {
           ) : (
             <ul className="divide-y divide-foreground/5">
               {schemeWithdrawals.map((row) => (
-                <li key={row.id} className="flex items-center justify-between gap-3 py-3">
+                <li key={row.id} className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
                     <p className="text-sm font-medium">{row.reason || "Withdrawal"}</p>
                     <p className="mt-0.5 text-sm text-muted-foreground">

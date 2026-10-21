@@ -20,14 +20,14 @@ export function GoalHeader({
         </p>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         {hasPrioritizableGoals && (
-          <Button variant="outline" onClick={onManageGoals}>
+          <Button variant="outline" className="flex-1 sm:flex-none" onClick={onManageGoals}>
             <SlidersHorizontal className="h-4 w-4" />
             Manage goals
           </Button>
         )}
-        <Button onClick={onAddGoal} data-tour="primary-action">
+        <Button className="flex-1 sm:flex-none" onClick={onAddGoal} data-tour="primary-action">
           <Plus className="h-4 w-4" />
           Add goal
         </Button>

@@ -302,7 +302,7 @@ function PolicyDialog({
           {/* Category */}
           <div className="space-y-1.5">
             <Label className="text-xs font-semibold">Category</Label>
-            <div className="grid grid-cols-5 gap-2">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
               {INSURANCE_CATEGORIES.filter((cat) => cat.value !== "home").map(
                 (cat) => (
                   <button
