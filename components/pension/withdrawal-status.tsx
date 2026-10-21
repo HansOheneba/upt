@@ -3,13 +3,14 @@
 import { Check, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import type { WithdrawalStatusEvent } from "@/lib/pension/types";
 import {
   WITHDRAWAL_BADGE_LABEL,
-  WITHDRAWAL_FLOW,
   WITHDRAWAL_STAGE_LABEL,
   isWithdrawalStatus,
   withdrawalStageState,
   withdrawalStageTimestamp,
+  withdrawalTimelineSteps,
   type WithdrawalStageState,
 } from "@/lib/pension/withdrawals";
 
@@ -36,6 +37,10 @@ export function WithdrawalStatusBadge({ status }: { status: string }) {
     );
   }
 
+  if (status === "declined") {
+    return <Badge variant="destructive">{WITHDRAWAL_BADGE_LABEL[status]}</Badge>;
+  }
+
   if (status === "approved") {
     return <Badge variant="outline">{WITHDRAWAL_BADGE_LABEL[status]}</Badge>;
   }
@@ -52,10 +57,12 @@ const STAGE_NOTE: Record<WithdrawalStageState, string> = {
 export function WithdrawalTimeline({
   status,
   submittedAt,
+  events,
   layout = "responsive",
 }: {
   status: string;
   submittedAt?: string | null;
+  events?: WithdrawalStatusEvent[];
   layout?: "responsive" | "stacked";
 }) {
   if (!isWithdrawalStatus(status)) {
@@ -66,17 +73,26 @@ export function WithdrawalTimeline({
     );
   }
 
+  const steps = withdrawalTimelineSteps(status, events);
   const stacked = layout === "stacked";
+  const declined = status === "declined";
 
   return (
     <ol
       aria-label="Withdrawal progress"
-      className={cn("flex flex-col", !stacked && "sm:grid sm:grid-cols-4 sm:gap-x-0")}
+      className={cn(
+        "flex flex-col",
+        !stacked && !declined && "sm:grid sm:grid-cols-4 sm:gap-x-0",
+      )}
     >
-      {WITHDRAWAL_FLOW.map((step, index) => {
-        const state = withdrawalStageState(status, step);
-        const timestamp = withdrawalStageTimestamp(step, submittedAt);
-        const last = index === WITHDRAWAL_FLOW.length - 1;
+      {steps.map((step, index) => {
+        const state: WithdrawalStageState = declined
+          ? index === steps.length - 1
+            ? "current"
+            : "complete"
+          : withdrawalStageState(status, step);
+        const timestamp = withdrawalStageTimestamp(step, submittedAt, events);
+        const last = index === steps.length - 1;
         const lineFilled = state === "complete";
 
         return (

@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { formatAmountTyping, finalizeAmountInput, formatGhs, parseAmountInput } from "@/lib/pension/metrics";
+import { personalMembership } from "@/lib/pension/portfolio";
 import { usePensionStore } from "@/store/pensionStore";
 
 export function PensionTargetDialog({
@@ -24,16 +25,17 @@ export function PensionTargetDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const member = usePensionStore((state) => state.member);
+  const memberships = usePensionStore((state) => state.memberships);
+  const personal = personalMembership(memberships);
   const updateTargets = usePensionStore((state) => state.updateTargets);
-  if (!member) return null;
+  if (!personal) return null;
 
   return (
     <TargetDialog
       open={open}
       onOpenChange={onOpenChange}
-      targetPot={member.targetPot > 0 ? member.targetPot : 0}
-      retirementAge={member.retirementAge > 0 ? member.retirementAge : 60}
+      targetPot={personal.targetPot && personal.targetPot > 0 ? personal.targetPot : 0}
+      retirementAge={personal.retirementAge && personal.retirementAge > 0 ? personal.retirementAge : 60}
       onSave={(next) => {
         updateTargets(next);
         onOpenChange(false);
@@ -46,10 +48,14 @@ export function PensionTarget({
   targetPot,
   retirementAge,
   currentValue,
+  variant = "full",
+  schemeName,
 }: {
   targetPot: number;
   retirementAge: number;
   currentValue: number | null;
+  variant?: "full" | "aside";
+  schemeName?: string;
 }) {
   const updateTargets = usePensionStore((state) => state.updateTargets);
   const [open, setOpen] = useState(false);
@@ -58,6 +64,61 @@ export function PensionTarget({
     hasTarget && currentValue != null
       ? Math.min(100, Math.round((currentValue / targetPot) * 100))
       : null;
+
+  const dialog = (
+    <TargetDialog
+      open={open}
+      onOpenChange={setOpen}
+      targetPot={hasTarget ? targetPot : 0}
+      retirementAge={retirementAge > 0 ? retirementAge : 60}
+      onSave={(next) => {
+        updateTargets(next);
+        setOpen(false);
+      }}
+    />
+  );
+
+  if (variant === "aside") {
+    return (
+      <div>
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-sm font-medium text-muted-foreground">Pension target</p>
+          <Button
+            type="button"
+            variant="link"
+            className="h-auto shrink-0 p-0 text-sm"
+            onClick={() => setOpen(true)}
+          >
+            {hasTarget ? "Edit" : "Set target"}
+          </Button>
+        </div>
+        {hasTarget ? (
+          <>
+            <p className="mt-1 text-2xl font-semibold tabular-nums tracking-tight">
+              {formatGhs(targetPot, 2)}
+            </p>
+            {retirementAge > 0 ? (
+              <p className="mt-1 text-sm text-muted-foreground">By age {retirementAge}</p>
+            ) : null}
+            {progress != null ? (
+              <div className="mt-3">
+                <Progress value={progress} aria-label="Progress toward your pension target" />
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {formatGhs(currentValue ?? 0, 2)}
+                  {schemeName ? ` in ${schemeName}` : " saved"} · {progress}%
+                </p>
+              </div>
+            ) : null}
+          </>
+        ) : (
+          <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+            Set the amount you want in your pension and the age you plan to retire.
+          </p>
+        )}
+        {dialog}
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -97,16 +158,7 @@ export function PensionTarget({
         </div>
       ) : null}
 
-      <TargetDialog
-        open={open}
-        onOpenChange={setOpen}
-        targetPot={hasTarget ? targetPot : 0}
-        retirementAge={retirementAge > 0 ? retirementAge : 60}
-        onSave={(next) => {
-          updateTargets(next);
-          setOpen(false);
-        }}
-      />
+      {dialog}
     </div>
   );
 }

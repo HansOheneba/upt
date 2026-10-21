@@ -3,23 +3,28 @@
 import { create } from "zustand";
 import { pensionStorageKey } from "@/lib/local-view";
 import {
-  DEMO_MEMBER,
-  PREVIEW_REQUESTS,
-  PREVIEW_WITHDRAWALS,
-  PREVIEW_CONTRIBUTIONS,
-  emptyMember,
+  emptySnapshot,
+  joinedSnapshot,
+  previewSnapshot,
   type JoinInput,
-  memberFromJoin,
 } from "@/lib/pension/demo-data";
+import { normalizeSnapshot } from "@/lib/pension/migrate";
+import { personalMembership, withdrawalPot } from "@/lib/pension/portfolio";
 import type {
   PensionRequest,
   PensionSnapshot,
   Withdrawal,
 } from "@/lib/pension/types";
-import { WITHDRAWAL_LOAD_ERROR } from "@/lib/pension/withdrawals";
+import {
+  WITHDRAWAL_LOAD_ERROR,
+  WITHDRAWAL_SAVE_ERROR,
+  submitWithdrawal,
+  type WithdrawalDraft,
+} from "@/lib/pension/withdrawals";
 
 const EMPTY: PensionSnapshot = {
   member: null,
+  memberships: [],
   contributions: [],
   withdrawals: [],
   requests: [],
@@ -35,22 +40,10 @@ function readSnapshot(): { snapshot: PensionSnapshot; error: string | null } {
   }
   if (!raw) return { snapshot: EMPTY, error: null };
   try {
-    const parsed = JSON.parse(raw) as PensionSnapshot;
-    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-      return { snapshot: EMPTY, error: WITHDRAWAL_LOAD_ERROR };
-    }
-    if ("withdrawals" in parsed && parsed.withdrawals != null && !Array.isArray(parsed.withdrawals)) {
-      return { snapshot: EMPTY, error: WITHDRAWAL_LOAD_ERROR };
-    }
-    return {
-      error: null,
-      snapshot: {
-        member: parsed.member ?? null,
-        contributions: Array.isArray(parsed.contributions) ? parsed.contributions : [],
-        withdrawals: Array.isArray(parsed.withdrawals) ? parsed.withdrawals : [],
-        requests: Array.isArray(parsed.requests) ? parsed.requests : [],
-      },
-    };
+    const parsed = JSON.parse(raw) as unknown;
+    const snapshot = normalizeSnapshot(parsed);
+    if (!snapshot) return { snapshot: EMPTY, error: WITHDRAWAL_LOAD_ERROR };
+    return { snapshot, error: null };
   } catch {
     return { snapshot: EMPTY, error: WITHDRAWAL_LOAD_ERROR };
   }
@@ -66,7 +59,11 @@ function writeSnapshot(snapshot: PensionSnapshot): boolean {
   }
 }
 
-export type NewWithdrawal = Omit<Withdrawal, "id" | "submittedAt" | "status">;
+export type NewWithdrawal = WithdrawalDraft;
+
+export type WithdrawalSaveResult =
+  | { ok: true; withdrawal: Withdrawal }
+  | { ok: false; error: string };
 
 type PensionStore = PensionSnapshot & {
   hydrated: boolean;
@@ -78,8 +75,8 @@ type PensionStore = PensionSnapshot & {
   loadJoined: (input: JoinInput) => void;
   /** Drops the in-memory snapshot. The saved local view stays on disk. */
   clear: () => void;
-  addWithdrawal: (input: NewWithdrawal) => void;
-  addRequest: (input: { subject: string; body: string }) => boolean;
+  addWithdrawal: (input: NewWithdrawal) => WithdrawalSaveResult;
+  addRequest: (input: { subject: string; body: string; membershipId: string }) => boolean;
   updateTargets: (input: { targetPot: number; retirementAge: number }) => void;
 };
 
@@ -89,6 +86,16 @@ function commit(
 ): void {
   writeSnapshot(snapshot);
   set({ ...snapshot, hydrated: true, loadError: null });
+}
+
+function currentSnapshot(get: () => PensionStore): PensionSnapshot {
+  return {
+    member: get().member,
+    memberships: get().memberships,
+    contributions: get().contributions,
+    withdrawals: get().withdrawals,
+    requests: get().requests,
+  };
 }
 
 export const usePensionStore = create<PensionStore>((set, get) => ({
@@ -108,31 +115,15 @@ export const usePensionStore = create<PensionStore>((set, get) => ({
   },
 
   loadPreview: () => {
-    commit(set, {
-      member: DEMO_MEMBER,
-      contributions: PREVIEW_CONTRIBUTIONS,
-      withdrawals: PREVIEW_WITHDRAWALS,
-      requests: PREVIEW_REQUESTS,
-    });
+    commit(set, previewSnapshot());
   },
 
   loadEmpty: (email) => {
-    commit(set, {
-      member: emptyMember(email),
-      contributions: [],
-      withdrawals: [],
-      requests: [],
-    });
+    commit(set, emptySnapshot(email));
   },
 
   loadJoined: (input) => {
-    const member = memberFromJoin(input);
-    commit(set, {
-      member,
-      contributions: [],
-      withdrawals: [],
-      requests: [],
-    });
+    commit(set, joinedSnapshot(input));
   },
 
   clear: () => {
@@ -140,46 +131,49 @@ export const usePensionStore = create<PensionStore>((set, get) => ({
   },
 
   addWithdrawal: (input) => {
-    const withdrawal: Withdrawal = {
-      ...input,
-      id: `wd-${Date.now()}`,
-      submittedAt: new Date().toISOString(),
-      status: "received",
-    };
+    const current = currentSnapshot(get);
+    const result = submitWithdrawal(current, input, new Date(), (membership) =>
+      withdrawalPot(membership, current.contributions, current.withdrawals),
+    );
+    if (!result.ok) return result;
+    if (result.duplicate) return { ok: true, withdrawal: result.withdrawal };
     const next: PensionSnapshot = {
-      member: get().member,
-      contributions: get().contributions,
-      withdrawals: [withdrawal, ...get().withdrawals],
-      requests: get().requests,
+      ...current,
+      withdrawals: [result.withdrawal, ...current.withdrawals],
     };
-    commit(set, next);
+    if (!writeSnapshot(next)) return { ok: false, error: WITHDRAWAL_SAVE_ERROR };
+    set({ ...next, hydrated: true, loadError: null });
+    return { ok: true, withdrawal: result.withdrawal };
   },
 
   updateTargets: ({ targetPot, retirementAge }) => {
-    const member = get().member;
-    if (!member) return;
+    const current = currentSnapshot(get);
+    const personal = personalMembership(current.memberships);
+    if (!current.member || !personal) return;
     commit(set, {
-      member: { ...member, targetPot, retirementAge },
-      contributions: get().contributions,
-      withdrawals: get().withdrawals,
-      requests: get().requests,
+      ...current,
+      memberships: current.memberships.map((membership) =>
+        membership.id === personal.id
+          ? { ...membership, targetPot, retirementAge }
+          : membership,
+      ),
     });
   },
 
-  addRequest: ({ subject, body }) => {
+  addRequest: ({ subject, body, membershipId }) => {
     const request: PensionRequest = {
       id: `req-${Date.now()}`,
+      membershipId,
       subject: subject.trim(),
       body: body.trim(),
       createdAt: new Date().toISOString(),
       channel: "app",
       status: "open",
     };
+    const current = currentSnapshot(get);
     const next: PensionSnapshot = {
-      member: get().member,
-      contributions: get().contributions,
-      withdrawals: get().withdrawals,
-      requests: [request, ...get().requests],
+      ...current,
+      requests: [request, ...current.requests],
     };
     if (!writeSnapshot(next)) return false;
     set({ ...next, hydrated: true, loadError: null });

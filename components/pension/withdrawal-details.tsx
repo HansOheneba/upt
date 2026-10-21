@@ -14,33 +14,56 @@ import {
   maskPaymentIdentifier,
   paymentChannelLabel,
   withdrawalExplanation,
+  withdrawalFollowUp,
+  withdrawalStatusUpdatedAt,
   withdrawalSubmittedLabel,
 } from "@/lib/pension/withdrawals";
 import { WithdrawalStatusBadge, WithdrawalTimeline } from "@/components/pension/withdrawal-status";
 
 export function WithdrawalDetailsSheet({
   withdrawal,
+  schemeName,
+  membershipReference,
   open,
   onOpenChange,
 }: {
   withdrawal: Withdrawal | null;
+  schemeName?: string;
+  membershipReference?: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full gap-0 overflow-hidden sm:max-w-md">
-        {withdrawal ? <WithdrawalDetailsBody withdrawal={withdrawal} /> : null}
+        {withdrawal ? (
+          <WithdrawalDetailsBody
+            withdrawal={withdrawal}
+            schemeName={schemeName}
+            membershipReference={membershipReference}
+          />
+        ) : null}
       </SheetContent>
     </Sheet>
   );
 }
 
-function WithdrawalDetailsBody({ withdrawal }: { withdrawal: Withdrawal }) {
+function WithdrawalDetailsBody({
+  withdrawal,
+  schemeName,
+  membershipReference,
+}: {
+  withdrawal: Withdrawal;
+  schemeName?: string;
+  membershipReference?: string;
+}) {
   const submitted = withdrawalSubmittedLabel(withdrawal.submittedAt);
+  const updated = withdrawalSubmittedLabel(withdrawalStatusUpdatedAt(withdrawal));
+  const confirmed = withdrawalSubmittedLabel(withdrawal.authorization?.confirmedAt);
   const amount = Number.isFinite(withdrawal.amount) ? formatGhs(withdrawal.amount, 2) : null;
   const masked = maskPaymentIdentifier(withdrawal.destination);
   const submittedDetails = submittedDetailRows(withdrawal);
+  const followUp = withdrawalFollowUp(withdrawal);
 
   return (
     <>
@@ -65,6 +88,14 @@ function WithdrawalDetailsBody({ withdrawal }: { withdrawal: Withdrawal }) {
           <p className="mt-2 text-sm leading-relaxed text-foreground">
             {withdrawalExplanation(withdrawal.status)}
           </p>
+          {updated ? (
+            <p className="mt-2 text-sm text-muted-foreground">
+              Updated <time dateTime={withdrawalStatusUpdatedAt(withdrawal) ?? undefined}>{updated}</time>
+            </p>
+          ) : null}
+          {followUp ? (
+            <p className="mt-2 text-sm leading-relaxed text-foreground">{followUp}</p>
+          ) : null}
         </section>
 
         <section>
@@ -73,6 +104,7 @@ function WithdrawalDetailsBody({ withdrawal }: { withdrawal: Withdrawal }) {
             <WithdrawalTimeline
               status={withdrawal.status}
               submittedAt={withdrawal.submittedAt}
+              events={withdrawal.events}
               layout="stacked"
             />
           </div>
@@ -81,10 +113,24 @@ function WithdrawalDetailsBody({ withdrawal }: { withdrawal: Withdrawal }) {
         <section>
           <h3 className={dashboardTheme.sectionLabel}>Request</h3>
           <dl className="mt-2">
+            <Fact label="Scheme" value={schemeName || "Scheme"} />
+            <Fact label="Membership" value={membershipReference || "Unavailable"} />
             <Fact label="Reference" value={withdrawal.id} mono />
             <Fact label="Submitted" value={submitted ?? "Date unavailable"} />
-            <Fact label="Pay to" value={paymentChannelLabel(withdrawal.destinationType)} />
+            <Fact label="Reason" value={withdrawal.reason?.trim() || "Withdrawal"} />
+            {withdrawal.reasonDetail?.trim() ? (
+              <Fact label="Explanation" value={withdrawal.reasonDetail.trim()} />
+            ) : null}
+            <Fact
+              label="Pay to"
+              value={
+                withdrawal.destinationType === "bank" && withdrawal.bankName
+                  ? withdrawal.bankName
+                  : paymentChannelLabel(withdrawal.destinationType)
+              }
+            />
             <Fact label="Account" value={masked ?? "Not provided"} />
+            {confirmed ? <Fact label="Authorized" value={confirmed} /> : null}
           </dl>
         </section>
 
@@ -142,7 +188,13 @@ function Fact({
   return (
     <div className="flex items-baseline justify-between gap-4 border-b border-border/70 py-2.5 last:border-b-0">
       <dt className="shrink-0 text-sm text-muted-foreground">{label}</dt>
-      <dd className={mono ? "min-w-0 break-all text-right font-mono text-xs" : "text-right text-sm font-medium"}>
+      <dd
+        className={
+          mono
+            ? "min-w-0 break-all text-right font-mono text-xs"
+            : "min-w-0 break-words text-right text-sm font-medium"
+        }
+      >
         {value}
       </dd>
     </div>

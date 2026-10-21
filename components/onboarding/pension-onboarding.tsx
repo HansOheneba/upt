@@ -26,8 +26,8 @@ import { cn } from "@/lib/utils";
 import { OnboardingShell } from "@/components/onboarding/onboarding-shell";
 import { CelereyLoader } from "@/components/login/celerey-loader";
 import { useClientGate } from "@/hooks/useClientGate";
-import { isOnboarded } from "@/lib/client-data";
 import { finishPensionJoin } from "@/lib/pension/enter";
+import { usePensionStore } from "@/store/pensionStore";
 import { formatAmountTyping, finalizeAmountInput, formatGhs, parseAmountInput } from "@/lib/pension/metrics";
 import { isValidPhoneNumber } from "libphonenumber-js";
 
@@ -168,6 +168,9 @@ const EMPTY: Draft = {
 export function PensionOnboarding() {
   const router = useRouter();
   const { ready, auth } = useClientGate();
+  const hydrated = usePensionStore((state) => state.hydrated);
+  const membershipCount = usePensionStore((state) => state.memberships.length);
+  const hydrate = usePensionStore((state) => state.hydrate);
   const [step, setStep] = useState(1);
   const [draft, setDraft] = useState<Draft>(EMPTY);
   const [error, setError] = useState<string | null>(null);
@@ -182,15 +185,21 @@ export function PensionOnboarding() {
   const selectedCountry = COUNTRIES.find((item) => item.name === draft.country);
 
   useEffect(() => {
-    if (!ready) return;
+    hydrate();
+  }, [hydrate]);
+
+  useEffect(() => {
+    if (!ready || !hydrated) return;
     if (!auth.loggedIn) {
       router.replace("/");
       return;
     }
-    if (isOnboarded()) router.replace("/dashboard");
-  }, [ready, auth.loggedIn, router]);
+    if (membershipCount > 0) router.replace("/dashboard");
+  }, [ready, hydrated, auth.loggedIn, membershipCount, router]);
 
-  if (!ready || !auth.loggedIn || isOnboarded()) return <CelereyLoader />;
+  if (!ready || !hydrated || !auth.loggedIn || membershipCount > 0) {
+    return <CelereyLoader />;
+  }
 
   function patch(partial: Partial<Draft>) {
     setDraft((current) => ({ ...current, ...partial }));

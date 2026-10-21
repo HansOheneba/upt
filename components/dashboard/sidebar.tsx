@@ -40,6 +40,7 @@ import {
   faListCheck,
   faCoins,
   faRightLeft,
+  faLayerGroup,
 } from "@fortawesome/free-solid-svg-icons";
 
 import { useFinancialStore } from "@/store/financialStore";
@@ -138,20 +139,36 @@ const wealthNavSections: NavSection[] = [
 const pensionNavSections: NavSection[] = [
   {
     label: null,
-    items: [{ label: "Overview", href: "/dashboard", icon: faChartPie }],
-  },
-  {
-    label: "My Own Pension",
     items: [
+      { label: "Overview", href: "/dashboard", icon: faChartPie },
+      { label: "My Schemes", href: "/dashboard/schemes", icon: faLayerGroup },
       { label: "Contributions", href: "/dashboard/contributions", icon: faCoins },
       { label: "Withdrawals", href: "/dashboard/withdrawals", icon: faRightLeft },
-      { label: "Requests", href: "/dashboard/requests", icon: faEnvelope },
-      { label: "Statement", href: "/dashboard/statement", icon: faFileLines },
+      { label: "Statements", href: "/dashboard/statement", icon: faFileLines },
+      { label: "Messages", href: "/dashboard/requests", icon: faEnvelope },
+      { label: "Appointments", href: "/dashboard/appointments", icon: faCalendarDays },
     ],
   },
-  ...wealthNavSections.filter(
-    (section) => section.label && section.label !== "Insights",
-  ),
+  {
+    label: "Financial Planning",
+    items: [
+      { label: "Assets", href: "/dashboard/assets", icon: faBriefcase },
+      { label: "Properties", href: "/dashboard/properties", icon: faHouse },
+      {
+        label: "Investment Opportunities",
+        href: "/dashboard/opportunities",
+        icon: faChartLine,
+      },
+      { label: "Goals & Planning", href: "/dashboard/goals", icon: faBullseye },
+      { label: "Cash Flow", href: "/dashboard/cash-flow", icon: faMoneyBillWave },
+      { label: "Liabilities", href: "/dashboard/liabilities", icon: faScaleUnbalanced },
+      { label: "Insurance", href: "/dashboard/insurance", icon: faShieldHalved },
+      { label: "Retirement", href: "/dashboard/retirement", icon: faUmbrellaBeach },
+      { label: "Tasks", href: "/dashboard/tasks", icon: faListCheck },
+      { label: "Documents", href: "/dashboard/documents", icon: faFileLines },
+      { label: "Advisor messages", href: "/dashboard/messages", icon: faEnvelope },
+    ],
+  },
 ];
 
 export default function DashboardSidebar() {

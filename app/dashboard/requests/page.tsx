@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { AlertCircle, Loader2, MessageCircle, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { DashboardEmptyState } from "@/components/dashboard/empty-state";
@@ -16,6 +17,13 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Sheet,
   SheetContent,
@@ -43,11 +51,15 @@ const STATUS_LABEL: Record<PensionRequest["status"], string> = {
 export default function RequestsPage() {
   const ready = usePensionReady();
   const requests = usePensionStore((state) => state.requests);
+  const memberships = usePensionStore((state) => state.memberships);
   const loadError = usePensionStore((state) => state.loadError);
   const reload = usePensionStore((state) => state.reload);
   const addRequest = usePensionStore((state) => state.addRequest);
+  const searchParams = useSearchParams();
+  const requestedId = searchParams.get("request");
   const [formOpen, setFormOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [membershipId, setMembershipId] = useState("");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -57,10 +69,27 @@ export default function RequestsPage() {
   const bodyRef = useRef<HTMLTextAreaElement>(null);
 
   const selected = requests.find((request) => request.id === selectedId) ?? null;
+  const schemeNames = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const membership of memberships) map.set(membership.id, membership.schemeName);
+    return map;
+  }, [memberships]);
 
   useEffect(() => {
     if (selectedId && !selected) setSelectedId(null);
   }, [selected, selectedId]);
+
+  useEffect(() => {
+    if (!ready || !requestedId) return;
+    if (requests.some((request) => request.id === requestedId)) {
+      setSelectedId(requestedId);
+    }
+  }, [ready, requestedId, requests]);
+
+  useEffect(() => {
+    if (membershipId && memberships.some((row) => row.id === membershipId)) return;
+    setMembershipId(memberships[0]?.id ?? "");
+  }, [memberships, membershipId]);
 
   function openForm() {
     setError(null);
@@ -82,12 +111,20 @@ export default function RequestsPage() {
       else bodyRef.current?.focus();
       return;
     }
+    if (memberships.length > 1 && !memberships.some((row) => row.id === membershipId)) {
+      setError("Choose the scheme this message is about.");
+      return;
+    }
 
     submittingRef.current = true;
     setSubmitting(true);
     setError(null);
     try {
-      const saved = addRequest({ subject, body });
+      const saved = addRequest({
+        subject,
+        body,
+        membershipId: memberships.some((row) => row.id === membershipId) ? membershipId : "",
+      });
       if (!saved) {
         setError(SUBMIT_ERROR);
         return;
@@ -107,8 +144,8 @@ export default function RequestsPage() {
   return (
     <PensionPage>
       <PensionPageHeader
-        title="Requests"
-        description="Send a question to our team and track responses to your requests."
+        title="Messages"
+        description="Send a question about a scheme and read the reply here."
         action={
           ready ? (
             <Button type="button" onClick={openForm}>
@@ -149,6 +186,7 @@ export default function RequestsPage() {
               <RequestRow
                 key={request.id}
                 request={request}
+                schemeName={schemeNames.get(request.membershipId) ?? ""}
                 onView={() => setSelectedId(request.id)}
               />
             ))}
@@ -178,6 +216,23 @@ export default function RequestsPage() {
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={submit} className="space-y-4">
+            {memberships.length > 1 ? (
+              <div className="space-y-2">
+                <Label htmlFor="req-scheme">Scheme</Label>
+                <Select value={membershipId} onValueChange={setMembershipId}>
+                  <SelectTrigger id="req-scheme" className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {memberships.map((membership) => (
+                      <SelectItem key={membership.id} value={membership.id}>
+                        {membership.schemeName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : null}
             <div className="space-y-2">
               <Label htmlFor="req-subject">Subject</Label>
               <Input
@@ -243,7 +298,12 @@ export default function RequestsPage() {
         }}
       >
         <SheetContent side="right" className="w-full gap-0 overflow-hidden sm:max-w-md">
-          {selected ? <RequestConversation request={selected} /> : null}
+          {selected ? (
+            <RequestConversation
+              request={selected}
+              schemeName={schemeNames.get(selected.membershipId) ?? ""}
+            />
+          ) : null}
         </SheetContent>
       </Sheet>
     </PensionPage>
@@ -252,9 +312,11 @@ export default function RequestsPage() {
 
 function RequestRow({
   request,
+  schemeName,
   onView,
 }: {
   request: PensionRequest;
+  schemeName: string;
   onView: () => void;
 }) {
   const submitted = submittedLabel(request.createdAt);
@@ -270,10 +332,13 @@ function RequestRow({
               <h3 className="truncate text-sm font-medium tracking-tight">{subject}</h3>
               {submitted ? (
                 <p className="mt-0.5 text-xs text-muted-foreground">
+                  {schemeName ? `${schemeName} · ` : ""}
                   <time dateTime={request.createdAt}>{submitted}</time>
                 </p>
               ) : (
-                <p className="mt-0.5 text-xs text-muted-foreground">Date unavailable</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {schemeName || "Date unavailable"}
+                </p>
               )}
             </div>
             <RequestStatusBadge status={request.status} />
@@ -300,7 +365,13 @@ function RequestRow({
   );
 }
 
-function RequestConversation({ request }: { request: PensionRequest }) {
+function RequestConversation({
+  request,
+  schemeName,
+}: {
+  request: PensionRequest;
+  schemeName: string;
+}) {
   const submitted = submittedLabel(request.createdAt);
   const replied = request.repliedAt ? submittedLabel(request.repliedAt) : null;
   const reply = request.reply?.trim() ?? "";
@@ -314,6 +385,7 @@ function RequestConversation({ request }: { request: PensionRequest }) {
           {subject}
         </SheetTitle>
         <SheetDescription>
+          {schemeName ? `${schemeName}. ` : ""}
           {submitted ? `Submitted ${submitted}` : "Submission date unavailable"}
         </SheetDescription>
         <div className="mt-2">

@@ -5,9 +5,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import { brand } from "@/lib/tenant";
+import { usePensionStore } from "@/store/pensionStore";
 
 export default function Breadcrumbs() {
   const pathname = usePathname();
+  const memberships = usePensionStore((state) => state.memberships);
 
   const segments = React.useMemo(() => {
     const parts = pathname.split("/").filter(Boolean);
@@ -15,15 +17,18 @@ export default function Breadcrumbs() {
     const visible = parts.slice(skip);
     return visible.map((part, index) => {
       const href = "/" + parts.slice(0, skip + index + 1).join("/");
-      // Format the label: capitalize and replace hyphens with spaces
-      const label =
-        brand.id === "upt" && part === "dashboard"
+      const membership = memberships.find((row) => row.id === part);
+      const label = membership
+        ? membership.schemeName
+        : brand.id === "upt" && part === "dashboard"
           ? "Overview"
-          : part.charAt(0).toUpperCase() + part.slice(1).replace(/-/g, " ");
+          : part === "schemes"
+            ? "My Schemes"
+            : part.charAt(0).toUpperCase() + part.slice(1).replace(/-/g, " ");
       const isLast = index === visible.length - 1;
       return { href, label, isLast };
     });
-  }, [pathname]);
+  }, [pathname, memberships]);
 
   return (
     <nav className="flex items-center text-sm min-w-0">

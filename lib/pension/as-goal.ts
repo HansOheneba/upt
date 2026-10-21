@@ -1,7 +1,8 @@
 import type { Goal } from "@/lib/client-data";
 import { outstandingUnits, potValue } from "@/lib/pension/metrics";
+import { personalMembership, rowsForMembership } from "@/lib/pension/portfolio";
 import { isUptPensionDemoActive } from "@/lib/pension/session";
-import type { Contribution, PensionMember, Withdrawal } from "@/lib/pension/types";
+import type { Contribution, Membership, PensionMember, Withdrawal } from "@/lib/pension/types";
 import { useFinancialStore } from "@/store/financialStore";
 import { usePensionStore } from "@/store/pensionStore";
 
@@ -33,28 +34,32 @@ function yearsUntil(date: Date): number {
 
 export function goalFromPension(
   member: PensionMember,
+  membership: Membership,
   contributions: Contribution[],
   withdrawals: Withdrawal[],
 ): Goal | null {
-  if (!Number.isFinite(member.targetPot) || member.targetPot <= 0) return null;
+  const targetPot = membership.targetPot ?? 0;
+  const retirementAge = membership.retirementAge ?? 0;
+  if (!Number.isFinite(targetPot) || targetPot <= 0) return null;
 
-  const priceReady = Number.isFinite(member.unitPrice) && member.unitPrice > 0;
+  const scopedContributions = rowsForMembership(contributions, membership.id);
+  const scopedWithdrawals = rowsForMembership(withdrawals, membership.id);
+  const priceReady = Number.isFinite(membership.unitPrice) && membership.unitPrice > 0;
   const current = priceReady
     ? potValue(
-        outstandingUnits(contributions, withdrawals, member.unitPrice),
-        member.unitPrice,
+        outstandingUnits(scopedContributions, scopedWithdrawals, membership.unitPrice),
+        membership.unitPrice,
       )
     : 0;
-  const target = member.targetPot;
-  const retires = retirementDate(member.dateOfBirth, member.retirementAge);
+  const retires = retirementDate(member.dateOfBirth, retirementAge);
   const yearsRemaining = retires ? yearsUntil(retires) : 0;
   const months = yearsRemaining > 0 ? Math.max(1, Math.round(yearsRemaining * 12)) : 0;
-  const gap = Math.max(0, target - current);
-  const monthly = Number.isFinite(member.monthlyContribution)
-    ? member.monthlyContribution
+  const gap = Math.max(0, targetPot - current);
+  const monthly = Number.isFinite(membership.monthlyContribution)
+    ? membership.monthlyContribution
     : 0;
   const covered = monthly * months;
-  const completed = current >= target;
+  const completed = current >= targetPot;
 
   return {
     id: PENSION_GOAL_ID,
@@ -63,12 +68,12 @@ export function goalFromPension(
     category: "retirement",
     priority: 1,
     description:
-      member.retirementAge > 0
-        ? `The amount you want in your pension by age ${member.retirementAge}.`
+      retirementAge > 0
+        ? `The amount you want in your pension by age ${retirementAge}.`
         : "The amount you want in your pension.",
     yearsRemaining,
     current,
-    target,
+    target: targetPot,
     completed,
     completedDate: completed ? isoDate(new Date()) : undefined,
     targetDate: retires ? isoDate(retires) : undefined,
@@ -78,7 +83,7 @@ export function goalFromPension(
       : gap <= 0
         ? 100
         : Math.max(0, Math.min(100, Math.round((covered / gap) * 100))),
-    createdAt: member.memberSince,
+    createdAt: membership.memberSince || new Date().toISOString(),
   };
 }
 
@@ -124,9 +129,10 @@ function signature(goals: Goal[]): string {
 /** Writes the pension target into the goals list as the first goal. */
 export function syncPensionGoalIntoFinancialStore(): void {
   if (!isUptPensionDemoActive()) return;
-  const { member, contributions, withdrawals } = usePensionStore.getState();
-  const pension = member
-    ? goalFromPension(member, contributions, withdrawals)
+  const { member, memberships, contributions, withdrawals } = usePensionStore.getState();
+  const personal = personalMembership(memberships);
+  const pension = member && personal
+    ? goalFromPension(member, personal, contributions, withdrawals)
     : null;
   const current = useFinancialStore.getState().goals;
   const next = withPensionGoalFirst(current, pension);

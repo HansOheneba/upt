@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { AlertCircle, Banknote, CalendarDays, Coins, Layers, Tag } from "lucide-react";
 import {
   DashCard,
@@ -12,7 +13,7 @@ import {
   CardTitle,
 } from "@/components/dashboard/dash-card";
 import { DashboardEmptyState } from "@/components/dashboard/empty-state";
-import { MetricCards } from "@/components/pension/metric-cards";
+import { MetricCards, type MetricCardItem } from "@/components/pension/metric-cards";
 import { PensionPage, PensionPageHeader } from "@/components/pension/page-frame";
 import { usePensionReady } from "@/components/pension/use-pension-ready";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   CONTRIBUTION_PAGE_SIZE,
+  contributionSourceLabel,
   contributionYears,
   sortContributionsDesc,
   summarizeContributions,
@@ -34,9 +36,8 @@ import {
   formatGhs,
   formatPensionDate,
   formatUnits,
-  outstandingUnits,
-  potValue,
 } from "@/lib/pension/metrics";
+import { figuresForMembership, rowsForMembership, summarizePortfolio } from "@/lib/pension/portfolio";
 import type { Contribution } from "@/lib/pension/types";
 import { usePensionStore } from "@/store/pensionStore";
 
@@ -45,14 +46,32 @@ export default function ContributionsPage() {
   const member = usePensionStore((state) => state.member);
   const contributions = usePensionStore((state) => state.contributions);
   const withdrawals = usePensionStore((state) => state.withdrawals);
+  const memberships = usePensionStore((state) => state.memberships);
   const loadError = usePensionStore((state) => state.loadError);
   const reload = usePensionStore((state) => state.reload);
+  const searchParams = useSearchParams();
+  const requestedMembership = searchParams.get("membership");
+  const [membershipId, setMembershipId] = useState("all");
+  const appliedQuery = useRef(false);
   const [year, setYear] = useState("all");
   const [page, setPage] = useState(0);
 
-  const summary = useMemo(() => summarizeContributions(contributions), [contributions]);
-  const rows = useMemo(() => sortContributionsDesc(contributions), [contributions]);
-  const years = useMemo(() => contributionYears(contributions), [contributions]);
+  useEffect(() => {
+    if (appliedQuery.current || !ready) return;
+    if (requestedMembership && memberships.some((row) => row.id === requestedMembership)) {
+      setMembershipId(requestedMembership);
+    }
+    appliedQuery.current = true;
+  }, [ready, requestedMembership, memberships]);
+
+  const selected = memberships.find((row) => row.id === membershipId) ?? null;
+  const scoped = useMemo(
+    () => (selected ? rowsForMembership(contributions, selected.id) : contributions),
+    [contributions, selected],
+  );
+  const summary = useMemo(() => summarizeContributions(scoped), [scoped]);
+  const rows = useMemo(() => sortContributionsDesc(scoped), [scoped]);
+  const years = useMemo(() => contributionYears(scoped), [scoped]);
   const filtered = useMemo(
     () => (year === "all" ? rows : rows.filter((row) => row.date.startsWith(year))),
     [rows, year],
@@ -63,15 +82,29 @@ export default function ContributionsPage() {
     safePage * CONTRIBUTION_PAGE_SIZE,
     safePage * CONTRIBUTION_PAGE_SIZE + CONTRIBUTION_PAGE_SIZE,
   );
+  const names = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const membership of memberships) map.set(membership.id, membership.schemeName);
+    return map;
+  }, [memberships]);
 
-  const priceReady =
-    member != null && Number.isFinite(member.unitPrice) && member.unitPrice > 0;
-  const unitsHeld =
-    member && priceReady
-      ? outstandingUnits(contributions, withdrawals, member.unitPrice)
+  const selectedFigures = selected
+    ? figuresForMembership(selected, contributions, withdrawals)
+    : null;
+  const portfolio = summarizePortfolio(memberships, contributions, withdrawals);
+  const pensionValue = selectedFigures ? selectedFigures.value : portfolio.total;
+  const unitsHeld = selectedFigures ? selectedFigures.units : null;
+  const priceLabel =
+    selected && selectedFigures && selectedFigures.value != null
+      ? formatGhs(selected.unitPrice, 4)
       : null;
-  const pensionValue =
-    unitsHeld != null && member ? potValue(unitsHeld, member.unitPrice) : null;
+  const priceDate =
+    selected && priceLabel && selected.unitPriceDate
+      ? `Effective ${formatPensionDate(selected.unitPriceDate)}`
+      : null;
+  const statementHref = selected
+    ? `/dashboard/statement?membership=${encodeURIComponent(selected.id)}`
+    : "/dashboard/statement";
 
   return (
     <PensionPage>
@@ -81,7 +114,7 @@ export default function ContributionsPage() {
         action={
           ready && member && !loadError ? (
             <Button type="button" variant="outline" asChild>
-              <Link href="/dashboard/statement">View statement</Link>
+              <Link href={statementHref}>View statement</Link>
             </Button>
           ) : null
         }
@@ -100,7 +133,7 @@ export default function ContributionsPage() {
         <DashboardEmptyState
           icon={<Coins />}
           title="Open your pension"
-          description="Your confirmed pension contributions will appear here once your My Own Pension account is open."
+          description="Your confirmed pension contributions will appear here once a membership is open."
           action={{ label: "Open an account", href: "/onboarding" }}
         />
       ) : contributions.length === 0 ? (
@@ -118,55 +151,79 @@ export default function ContributionsPage() {
             units={formatUnits(summary.totalUnits)}
             latestAmount={summary.latest ? formatGhs(summary.latest.amount, 2) : "Unavailable"}
             latestDate={summary.latest ? formatPensionDate(summary.latest.date) : "Date unavailable"}
-            unitPrice={priceReady && member ? formatGhs(member.unitPrice, 4) : "Unavailable"}
-            unitPriceDate={
-              priceReady && member?.unitPriceDate
-                ? `Effective ${formatPensionDate(member.unitPriceDate)}`
-                : "No unit price on file"
-            }
+            unitPrice={priceLabel}
+            unitPriceDate={priceDate}
           />
 
           <PensionValueNote
+            combined={!selected}
             value={pensionValue}
             unitsHeld={unitsHeld}
-            unitPrice={priceReady && member ? formatGhs(member.unitPrice, 4) : null}
+            unitPrice={priceLabel}
           />
 
           <DashCard>
             <CardHeader>
               <CardTitle>Contribution history</CardTitle>
               <CardDescription>
-                Date, amount, unit price, and units for each contribution.
+                Date, source, amount, unit price, and units for each contribution.
               </CardDescription>
-              {years.length > 1 ? (
-                <CardAction>
-                  <Select
-                    value={year}
-                    onValueChange={(value) => {
-                      setYear(value);
-                      setPage(0);
-                    }}
-                  >
-                    <SelectTrigger size="sm" aria-label="Filter contributions by year">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All years</SelectItem>
-                      {years.map((item) => (
-                        <SelectItem key={item} value={item}>
-                          {item}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </CardAction>
-              ) : null}
+              <CardAction>
+                <div className="flex flex-wrap justify-end gap-2">
+                  {memberships.length > 1 ? (
+                    <Select
+                      value={selected ? selected.id : "all"}
+                      onValueChange={(value) => {
+                        setMembershipId(value);
+                        setYear("all");
+                        setPage(0);
+                      }}
+                    >
+                      <SelectTrigger size="sm" aria-label="Filter contributions by scheme">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All schemes</SelectItem>
+                        {memberships.map((membership) => (
+                          <SelectItem key={membership.id} value={membership.id}>
+                            {membership.schemeName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : null}
+                  {years.length > 1 ? (
+                    <Select
+                      value={year}
+                      onValueChange={(value) => {
+                        setYear(value);
+                        setPage(0);
+                      }}
+                    >
+                      <SelectTrigger size="sm" aria-label="Filter contributions by year">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All years</SelectItem>
+                        {years.map((item) => (
+                          <SelectItem key={item} value={item}>
+                            {item}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : null}
+                </div>
+              </CardAction>
             </CardHeader>
             <CardContent>
               {filtered.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No contributions in {year}.</p>
+                <p className="text-sm text-muted-foreground">No contributions in this view.</p>
               ) : (
-                <ContributionTable rows={pageRows} />
+                <ContributionTable
+                  rows={pageRows}
+                  schemeNames={selected ? null : names}
+                />
               )}
               {pageCount > 1 ? (
                 <nav
@@ -222,51 +279,51 @@ function ContributionSummary({
   units: string;
   latestAmount: string;
   latestDate: string;
-  unitPrice: string;
-  unitPriceDate: string;
+  unitPrice: string | null;
+  unitPriceDate: string | null;
 }) {
-  return (
-    <MetricCards
-      label="Contribution summary"
-      items={[
-        {
-          label: "Total contributions received",
-          value: received,
-          detail: `${paymentCount} ${paymentCount === 1 ? "payment" : "payments"}`,
-          icon: Banknote,
-          tone: "blue",
-        },
-        {
-          label: "Total units allocated",
-          value: units,
-          detail: "Allocated on each contribution",
-          icon: Layers,
-          tone: "green",
-        },
-        {
-          label: "Latest contribution",
-          value: latestAmount,
-          detail: latestDate,
-          icon: CalendarDays,
-          tone: "gold",
-        },
-        {
-          label: "Latest unit price",
-          value: unitPrice,
-          detail: unitPriceDate,
-          icon: Tag,
-          tone: "violet",
-        },
-      ]}
-    />
-  );
+  const items: MetricCardItem[] = [
+    {
+      label: "Total contributions received",
+      value: received,
+      detail: `${paymentCount} ${paymentCount === 1 ? "payment" : "payments"}`,
+      icon: Banknote,
+      tone: "blue",
+    },
+    {
+      label: "Total units allocated",
+      value: units,
+      detail: "Allocated on each contribution",
+      icon: Layers,
+      tone: "green",
+    },
+    {
+      label: "Latest contribution",
+      value: latestAmount,
+      detail: latestDate,
+      icon: CalendarDays,
+      tone: "gold",
+    },
+  ];
+  if (unitPrice && unitPriceDate) {
+    items.push({
+      label: "Latest unit price",
+      value: unitPrice,
+      detail: unitPriceDate,
+      icon: Tag,
+      tone: "violet",
+    });
+  }
+  return <MetricCards label="Contribution summary" items={items} />;
 }
 
 function PensionValueNote({
+  combined,
   value,
   unitsHeld,
   unitPrice,
 }: {
+  combined: boolean;
   value: number | null;
   unitsHeld: number | null;
   unitPrice: string | null;
@@ -278,20 +335,24 @@ function PensionValueNote({
     >
       <div className="border-l-2 border-[var(--brand-primary)] pl-4">
         <h2 id="pension-value-heading" className="text-xs font-medium text-muted-foreground">
-          Current pension value
+          {combined ? "Combined pension value" : "Current scheme value"}
         </h2>
-        {value != null && unitsHeld != null && unitPrice ? (
+        {value != null ? (
           <>
             <p className="mt-1.5 text-2xl font-semibold tabular-nums tracking-tight">
               {formatGhs(value, 2)}
             </p>
             <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-              {formatUnits(unitsHeld)} units held at {unitPrice}.
+              {combined
+                ? "Current value of active schemes that have a unit price. This is separate from contributions received."
+                : unitsHeld != null && unitPrice
+                  ? `${formatUnits(unitsHeld)} units held at ${unitPrice}.`
+                  : "Current value of the units held in this scheme."}
             </p>
           </>
         ) : (
           <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-            Your pension value appears here when a unit price is available for the units you hold.
+            Scheme value appears here when a unit price is available for the units held.
           </p>
         )}
       </div>
@@ -299,7 +360,13 @@ function PensionValueNote({
   );
 }
 
-function ContributionTable({ rows }: { rows: Contribution[] }) {
+function ContributionTable({
+  rows,
+  schemeNames,
+}: {
+  rows: Contribution[];
+  schemeNames: Map<string, string> | null;
+}) {
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[36rem] text-sm">
@@ -308,6 +375,14 @@ function ContributionTable({ rows }: { rows: Contribution[] }) {
           <tr className="border-b text-left text-xs text-muted-foreground">
             <th scope="col" className="py-2 pr-4 font-medium">
               Date
+            </th>
+            {schemeNames ? (
+              <th scope="col" className="py-2 pr-4 font-medium">
+                Scheme
+              </th>
+            ) : null}
+            <th scope="col" className="py-2 pr-4 font-medium">
+              Source
             </th>
             <th scope="col" className="py-2 pr-4 text-right font-medium">
               Contribution
@@ -326,6 +401,10 @@ function ContributionTable({ rows }: { rows: Contribution[] }) {
               <td className="py-3 pr-4">
                 <time dateTime={row.date.slice(0, 10)}>{formatPensionDate(row.date)}</time>
               </td>
+              {schemeNames ? (
+                <td className="py-3 pr-4">{schemeNames.get(row.membershipId) ?? "Scheme"}</td>
+              ) : null}
+              <td className="py-3 pr-4">{contributionSourceLabel(row.channel)}</td>
               <td className="py-3 pr-4 text-right font-medium tabular-nums">
                 {Number.isFinite(row.amount) ? formatGhs(row.amount, 2) : "Unavailable"}
               </td>

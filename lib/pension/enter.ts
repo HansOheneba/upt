@@ -11,6 +11,7 @@ import {
 } from "@/lib/pension/demo-data";
 import { hydrateDemoStore } from "@/lib/demo-mode";
 import { financialStorageKey, getLocalView, setLocalView } from "@/lib/local-view";
+import { personalMembership } from "@/lib/pension/portfolio";
 import type { PensionMember } from "@/lib/pension/types";
 import { syncPensionGoalIntoFinancialStore } from "@/lib/pension/as-goal";
 import { setPensionDemoMode } from "@/lib/pension/session";
@@ -32,7 +33,7 @@ function markActivePensionSession(email: string): void {
   setPensionDemoMode("active");
 }
 
-function userFromMember(member: PensionMember): User {
+function userFromMember(member: PensionMember, memberSince?: string): User {
   const name = `${member.firstName} ${member.lastName}`.trim();
   const now = new Date().toISOString();
   return {
@@ -48,7 +49,7 @@ function userFromMember(member: PensionMember): User {
     user_type: "regular",
     currency: "GHS",
     is_active: true,
-    created_at: member.memberSince || now,
+    created_at: memberSince || now,
     updated_at: now,
     occupation: member.profession || undefined,
   };
@@ -74,9 +75,13 @@ function readSavedFinancial(): Record<string, unknown> | null {
   }
 }
 
+function memberSince(): string | undefined {
+  return personalMembership(usePensionStore.getState().memberships)?.memberSince;
+}
+
 function ensureProfile(member: PensionMember): void {
   if (!useFinancialStore.getState().user) {
-    useFinancialStore.getState().setUser(userFromMember(member));
+    useFinancialStore.getState().setUser(userFromMember(member, memberSince()));
   }
   syncPensionGoalIntoFinancialStore();
 }
@@ -121,7 +126,7 @@ export function startPopulatedDemo(): void {
 
   hydrateDemoStore();
   const member = usePensionStore.getState().member ?? DEMO_MEMBER;
-  useFinancialStore.getState().setUser(userFromMember(member));
+  useFinancialStore.getState().setUser(userFromMember(member, memberSince()));
   syncPensionGoalIntoFinancialStore();
 }
 

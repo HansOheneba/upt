@@ -21,25 +21,25 @@ export type KpiItem = {
   label: string;
   value: string;
   subline?: string;
+  /** 0 to 100. Draws a thin bar in the card colour. */
+  progress?: number;
   tone?: "good" | "warning" | "danger" | "neutral";
   /** Tints the icon. Omitted cards cycle through the four summary colours. */
   accent?: KpiAccent;
   icon?: React.ReactNode;
+  /** Extra control, such as an edit action. Kept out of the card click target. */
+  action?: React.ReactNode;
   onClick?: () => void;
   tooltip?: React.ReactNode;
 };
 
 type CardTone = "blue" | "green" | "gold" | "violet";
 
-const cardTones: Record<CardTone, { tint: string; icon: string; fallback: LucideIcon }> = {
-  blue: {
-    tint: "bg-[color-mix(in_srgb,var(--brand-primary)_8%,white)]",
-    icon: "text-[var(--brand-primary)]",
-    fallback: Wallet,
-  },
-  green: { tint: "bg-[#E7F2EB]", icon: "text-[#3E6B52]", fallback: Layers },
-  gold: { tint: "bg-[#F6F1E4]", icon: "text-[#8C7344]", fallback: Banknote },
-  violet: { tint: "bg-[#F1EEF6]", icon: "text-[#5E5678]", fallback: Tag },
+const cardTones: Record<CardTone, { color: string; fallback: LucideIcon }> = {
+  blue: { color: "#4C7DFF", fallback: Wallet },
+  green: { color: "#2FA58A", fallback: Layers },
+  gold: { color: "#E0A23A", fallback: Banknote },
+  violet: { color: "#8B7CF8", fallback: Tag },
 };
 
 const toneCycle: CardTone[] = ["blue", "green", "gold", "violet"];
@@ -132,6 +132,7 @@ function KpiCard({
       : item.tone === "warning"
         ? "text-amber-700"
         : "text-foreground";
+  const wash = `linear-gradient(165deg, color-mix(in srgb, ${tone.color} 14%, white) 0%, #ffffff 58%)`;
 
   function activate() {
     item.onClick?.();
@@ -140,9 +141,11 @@ function KpiCard({
   return (
     <article
       className={cn(
-        "flex h-full flex-col rounded-xl bg-card p-4 text-left ring-1 ring-foreground/10",
-        item.onClick && "cursor-pointer transition-colors duration-150 ease-out hover:bg-muted/40",
+        "flex h-full flex-col rounded-xl border border-border p-4 text-left",
+        item.onClick &&
+          "cursor-pointer transition-[border-color] duration-150 ease-out hover:border-transparent",
       )}
+      style={{ background: wash }}
       role={item.onClick ? "button" : undefined}
       tabIndex={item.onClick ? 0 : undefined}
       onClick={item.onClick ? activate : undefined}
@@ -158,35 +161,59 @@ function KpiCard({
       }
     >
       <div className="flex items-start justify-between gap-3">
-        <div className="flex min-h-10 min-w-0 items-start gap-1">
-          <p className="text-xs font-medium leading-5 text-muted-foreground">
-            {formatUiLabel(item.label)}
-          </p>
-          {item.tooltip ? <KpiInfoTip content={item.tooltip} /> : null}
+        <div className="min-w-0 space-y-1">
+          <div className="flex items-start gap-1">
+            <p className="text-xs leading-5 text-muted-foreground">
+              {formatUiLabel(item.label)}
+            </p>
+            {item.tooltip ? <KpiInfoTip content={item.tooltip} /> : null}
+          </div>
+          {loading ? (
+            <Skeleton className="h-7 w-28" />
+          ) : (
+            <p className={cn("text-2xl font-semibold tabular-nums tracking-tight", valueClass)}>
+              {item.value}
+            </p>
+          )}
         </div>
         <span
-          className={cn(
-            "flex size-8 shrink-0 items-center justify-center rounded-lg [&_svg]:size-4",
-            tone.tint,
-            tone.icon,
-          )}
+          className="flex size-10 shrink-0 items-center justify-center rounded-md [&_svg]:size-4"
+          style={{
+            background: `color-mix(in srgb, ${tone.color} 16%, white)`,
+            color: tone.color,
+          }}
         >
           {item.icon ?? <Fallback aria-hidden className="size-4" />}
         </span>
       </div>
       {loading ? (
-        <>
-          <Skeleton className="mt-3 h-7 w-28" />
-          <Skeleton className="mt-2 h-4 w-32" />
-        </>
+        <Skeleton className="mt-3 h-4 w-32" />
       ) : (
         <>
-          <p className={cn("mt-3 text-xl font-semibold tabular-nums tracking-tight", valueClass)}>
-            {item.value}
-          </p>
-          <p className="mt-1.5 min-h-5 text-xs leading-5 text-muted-foreground">
-            {item.subline ?? ""}
-          </p>
+          {item.progress != null ? (
+            <div
+              className="mt-3 h-1.5 overflow-hidden rounded-full bg-black/5"
+              role="progressbar"
+              aria-valuenow={Math.round(item.progress)}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label={item.label}
+            >
+              <div
+                className="h-full rounded-full"
+                style={{
+                  width: `${Math.max(0, Math.min(100, item.progress))}%`,
+                  background: tone.color,
+                }}
+              />
+            </div>
+          ) : null}
+          <div className={cn("flex items-start justify-between gap-3", item.progress != null ? "mt-1.5" : "mt-3")}>
+            <p className="min-h-5 text-xs leading-5 text-muted-foreground">
+              {item.subline ?? ""}
+            </p>
+            {item.action}
+          </div>
         </>
       )}
     </article>
